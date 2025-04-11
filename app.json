@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "aluguel-ai-funcional",
+    "slug": "aluguel-ai-funcional",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "entryPoint": "./App.js",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {},
+    "platforms": ["ios", "android", "web"]
+  }
+}
