@@ -1,50 +1,107 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# 📱 AlugApp — Gerenciamento de Aluguéis
 
-## Get started
+Aplicativo construído com [React Native](https://reactnative.dev/) e [Expo](https://expo.dev/) para gerenciamento de imóveis, inquilinos, contratos e pagamentos. Ideal para proprietários e administradores de imóveis.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🚀 Funcionalidades implementadas
 
-2. Start the app
+- Login com autenticação via `AsyncStorage`
+- Usuário padrão: **admin / admin**
+- Cadastro e listagem de:
+  - Inquilinos
+  - Usuários
+- Tela principal com navegação em grade (HomeScreen)
+- Cadastro de contratos, pagamentos, histórico
+- Integração com inteligência artificial (DashboardIA)
+- Compatível com **Web, Android e iOS**
 
-   ```bash
-    npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tecnologias utilizadas
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo](https://expo.dev/)
+- React Native
+- React Navigation
+- AsyncStorage (`@react-native-async-storage/async-storage`)
+- [Expo Vector Icons](https://icons.expo.fyi/)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🧪 Como rodar no navegador (Web)
 
-When you're ready, run:
+### Pré-requisitos
+
+- Node.js
+- npm ou yarn
+- Git
+- Expo CLI (opcional)
+
+### Instale as dependências
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Rode o projeto no navegador
 
-## Learn more
+```bash
+npx expo start --web
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Depois de iniciado, pressione **`w`** para abrir no navegador.  
+Você também pode escanear o QR Code no celular usando o app **Expo Go**.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 📁 Estrutura do projeto
 
-Join our community of developers creating universal apps.
+```bash
+screens/
+├── LoginScreen.js
+├── HomeScreen.js
+├── DashboardIA.js
+├── CadastroInquilinoScreen.js
+├── ListaInquilinosScreen.js
+├── CadastroUsuarioScreen.js
+├── ListaUsuariosScreen.js
+├── ContratoScreen.js
+├── PagamentosScreen.js
+├── HistoricoScreen.js
+├── ConfiguracoesScreen.js
+└── AjudaScreen.js
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+db/
+└── (opcional, se for usar SQLite futuramente)
+
+App.js          # Ponto de entrada do app
+```
+
+---
+
+## 👤 Usuário padrão
+
+- **Login:** `admin`
+- **Senha:** `admin`
+
+Usuários adicionais podem ser cadastrados via tela "Cadastro de Usuário".
+
+---
+
+## 🧼 Limpar cache (se der erro)
+
+```bash
+npx expo start -c --web
+```
+
+---
+
+## 📚 Saiba mais
+
+- [Documentação Expo](https://docs.expo.dev/)
+- [React Native](https://reactnative.dev/docs/getting-started)
+
+---
+
+Feito com 💙 por [Jean Ferreira]

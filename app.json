@@ -1,19 +1,28 @@
 {
   "expo": {
-    "name": "aluguel-ai-funcional",
-    "slug": "aluguel-ai-funcional",
+    "name": "alugapp",
+    "slug": "alugapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "entryPoint": "./App.js",
-    "newArchEnabled": true,
-    "ios": { "supportsTablet": true },
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       }
     },
     "web": {},
-    "platforms": ["ios", "android", "web"]
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }

@@ -1,0 +1,49 @@
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+expo-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# VSCode
+.vscode/
+
+# Expo files
+.expo/
+.expo-shared/
+
+# Build directories
+dist/
+build/
+web-build/
+
+# iOS and Android build artifacts
+ios/build/
+android/app/build/
+
+# Misc
+*.log
+*.sqlite
+*.sqlite-journal
+
+# Mac-specific files
+*.DS_Store
+
+# IDE files
+.idea/
+*.iml
+
+# Sentry sourcemaps
+sourcemaps/
