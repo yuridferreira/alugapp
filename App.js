@@ -8,7 +8,10 @@ import HomeScreen from './screens/HomeScreen';
 import CadastroInquilinoScreen from './screens/CadastroInquilinoScreen';
 import ListaInquilinosScreen from './screens/ListaInquilinosScreen';
 import ListaUsuariosScreen from './screens/ListaUsuariosScreen';
-import ContratoScreen from './screens/ContratoScreen';
+import CadastroContratoScreen from './screens/CadastroContratoScreen';
+import CadastroImovelScreen from './screens/CadastroImovelScreen';
+import ListaContratosScreen from './screens/ListaContratosScreen';
+import ListaImoveisScreen from './screens/ListaImoveisScreen';
 import PagamentosScreen from './screens/PagamentosScreen';
 import HistoricoScreen from './screens/HistoricoScreen';
 import ConfiguracoesScreen from './screens/ConfiguracoesScreen';
@@ -28,7 +31,10 @@ export default function App() {
         <Stack.Screen name="CadastroUsuario" component={CadastroUsuarioScreen} />
         <Stack.Screen name="ListaInquilinos" component={ListaInquilinosScreen} />
         <Stack.Screen name="ListaUsuarios" component={ListaUsuariosScreen} />
-        <Stack.Screen name="Contrato" component={ContratoScreen} />
+        <Stack.Screen name="CadastroImovel" component={CadastroImovelScreen} />
+        <Stack.Screen name="ListaImoveis" component={ListaImoveisScreen} />
+        <Stack.Screen name="Contrato" component={CadastroContratoScreen} />
+        <Stack.Screen name="ListaContratos" component={ListaContratosScreen} />
         <Stack.Screen name="Pagamentos" component={PagamentosScreen} />
         <Stack.Screen name="Historico" component={HistoricoScreen} />
         <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />

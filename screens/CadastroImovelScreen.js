@@ -1,0 +1,62 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function CadastroImovelScreen({ route, navigation }) {
+  const [id, setId] = useState('');
+  const [endereco, setEndereco] = useState('');
+  const [tipo, setTipo] = useState('');
+  const [valor, setValor] = useState('');
+  const [editando, setEditando] = useState(false);
+
+  useEffect(() => {
+    if (route.params?.editar) {
+      const imovel = route.params.editar;
+      setId(imovel.id);
+      setEndereco(imovel.endereco);
+      setTipo(imovel.tipo);
+      setValor(imovel.valor);
+      setEditando(true);
+    }
+  }, [route.params]);
+
+  const handleSalvar = async () => {
+    if (!endereco || !tipo || !valor) {
+      Alert.alert('Preencha todos os campos!');
+      return;
+    }
+
+    const novoId = editando ? id : Date.now().toString();
+    const imovel = { id: novoId, endereco, tipo, valor };
+
+    try {
+      await AsyncStorage.setItem(`imovel_${novoId}`, JSON.stringify(imovel));
+      Alert.alert(editando ? 'Imóvel atualizado!' : 'Imóvel cadastrado com sucesso!');
+      navigation.navigate('ListaImoveis');
+    } catch (error) {
+      console.error('Erro ao salvar imóvel:', error);
+      Alert.alert('Erro ao salvar o imóvel.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{editando ? 'Editar Imóvel' : 'Cadastro de Imóvel'}</Text>
+
+      <TextInput style={styles.input} placeholder="Endereço" value={endereco} onChangeText={setEndereco} />
+      <TextInput style={styles.input} placeholder="Tipo (Casa, Apto...)" value={tipo} onChangeText={setTipo} />
+      <TextInput style={styles.input} placeholder="Valor (R$)" value={valor} onChangeText={setValor} keyboardType="numeric" />
+
+      <Button title={editando ? 'Salvar Alterações' : 'Cadastrar'} onPress={handleSalvar} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: '#fff', justifyContent: 'center' },
+  title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
+  input: {
+    borderWidth: 1, borderColor: '#ccc', borderRadius: 6,
+    padding: 10, marginBottom: 12,
+  },
+});
