@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Picker, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 
 export default function CadastroContratoScreen({ navigation }) {
   const [inquilinos, setInquilinos] = useState([]);
@@ -25,6 +26,21 @@ export default function CadastroContratoScreen({ navigation }) {
     }
     carregarDados();
   }, []);
+
+  const formatarData = (value) => {
+    const numeros = value.replace(/\D/g, '').slice(0, 8);
+    let resultado = '';
+
+    if (numeros.length <= 2) {
+      resultado = numeros;
+    } else if (numeros.length <= 4) {
+      resultado = `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+    } else {
+      resultado = `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
+    }
+
+    return resultado;
+  };
 
   const handleSalvar = async () => {
     if (!selectedInquilino || !selectedImovel || !inicio || !fim || !valor) {
@@ -71,9 +87,27 @@ export default function CadastroContratoScreen({ navigation }) {
         ))}
       </Picker>
 
-      <TextInput style={styles.input} placeholder="Data de Início (DD/MM/AAAA)" value={inicio} onChangeText={setInicio} />
-      <TextInput style={styles.input} placeholder="Data de Fim (DD/MM/AAAA)" value={fim} onChangeText={setFim} />
-      <TextInput style={styles.input} placeholder="Valor (R$)" value={valor} onChangeText={setValor} keyboardType="numeric" />
+      <TextInput
+        style={styles.input}
+        placeholder="Data de Início (DD/MM/AAAA)"
+        value={inicio}
+        onChangeText={(text) => setInicio(formatarData(text))}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Data de Fim (DD/MM/AAAA)"
+        value={fim}
+        onChangeText={(text) => setFim(formatarData(text))}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Valor (R$)"
+        value={valor}
+        onChangeText={setValor}
+        keyboardType="numeric"
+      />
 
       <Button title="Salvar Contrato" onPress={handleSalvar} />
     </ScrollView>

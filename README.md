@@ -47,7 +47,9 @@ npm install
 ### Rode o projeto no navegador
 
 ```bash
-npx expo start --web
+npm start
+ou
+npx expo start -c --web
 ```
 
 Depois de iniciado, pressione **`w`** para abrir no navegador.  

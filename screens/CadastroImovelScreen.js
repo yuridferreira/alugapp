@@ -6,7 +6,9 @@ export default function CadastroImovelScreen({ route, navigation }) {
   const [id, setId] = useState('');
   const [endereco, setEndereco] = useState('');
   const [tipo, setTipo] = useState('');
-  const [valor, setValor] = useState('');
+  const [andar, setAndar] = useState('');
+  const [completo, setCompleto] = useState('');
+  const [torre, setTorre] = useState('');
   const [editando, setEditando] = useState(false);
 
   useEffect(() => {
@@ -15,19 +17,28 @@ export default function CadastroImovelScreen({ route, navigation }) {
       setId(imovel.id);
       setEndereco(imovel.endereco);
       setTipo(imovel.tipo);
-      setValor(imovel.valor);
+      setAndar(imovel.andar || '');
+      setCompleto(imovel.completo || '');
+      setTorre(imovel.torre || '');
       setEditando(true);
     }
   }, [route.params]);
 
   const handleSalvar = async () => {
-    if (!endereco || !tipo || !valor) {
+    if (!endereco || !tipo || !andar || !completo || !torre) {
       Alert.alert('Preencha todos os campos!');
       return;
     }
 
     const novoId = editando ? id : Date.now().toString();
-    const imovel = { id: novoId, endereco, tipo, valor };
+    const imovel = {
+      id: novoId,
+      endereco,
+      tipo,
+      andar,
+      completo,
+      torre
+    };
 
     try {
       await AsyncStorage.setItem(`imovel_${novoId}`, JSON.stringify(imovel));
@@ -45,7 +56,9 @@ export default function CadastroImovelScreen({ route, navigation }) {
 
       <TextInput style={styles.input} placeholder="Endereço" value={endereco} onChangeText={setEndereco} />
       <TextInput style={styles.input} placeholder="Tipo (Casa, Apto...)" value={tipo} onChangeText={setTipo} />
-      <TextInput style={styles.input} placeholder="Valor (R$)" value={valor} onChangeText={setValor} keyboardType="numeric" />
+      <TextInput style={styles.input} placeholder="Andar" value={andar} onChangeText={setAndar} />
+      <TextInput style={styles.input} placeholder="Completo" value={completo} onChangeText={setCompleto} />
+      <TextInput style={styles.input} placeholder="Torre" value={torre} onChangeText={setTorre} />
 
       <Button title={editando ? 'Salvar Alterações' : 'Cadastrar'} onPress={handleSalvar} />
     </View>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ListaImoveisScreen({ navigation }) {
@@ -10,7 +10,7 @@ export default function ListaImoveisScreen({ navigation }) {
       const keys = await AsyncStorage.getAllKeys();
       const imovelKeys = keys.filter(k => k.startsWith('imovel_'));
       const entries = await AsyncStorage.multiGet(imovelKeys);
-      const lista = entries.map(([_, value]) => JSON.parse(value));
+      const lista = entries.map(([_, v]) => JSON.parse(v));
       setImoveis(lista);
     } catch (error) {
       console.error('Erro ao carregar imóveis:', error);
@@ -40,8 +40,11 @@ export default function ListaImoveisScreen({ navigation }) {
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
-      <Text style={styles.titulo}>{item.tipo} - R$ {item.valor}</Text>
-      <Text>{item.endereco}</Text>
+      <Text style={styles.titulo}>{item.tipo}</Text>
+      <Text>Endereço: {item.endereco}</Text>
+      <Text>Andar: {item.andar}</Text>
+      <Text>Completo: {item.completo}</Text>
+      <Text>Torre: {item.torre}</Text>
       <View style={styles.botoes}>
         <Button title="Editar" onPress={() => navigation.navigate('CadastroImovel', { editar: item })} />
         <Button title="Excluir" color="#d9534f" onPress={() => excluirImovel(item.id)} />
