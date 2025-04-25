@@ -60,12 +60,19 @@ export default function ListaContratosScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
+  // Função para formatar a data para o formato DD/MM/YYYY
+  const formatarData = (data) => {
+    if (!data) return 'Não definida';
+    const [ano, mes, dia] = data.split('-');
+    return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.titulo}>Contrato {item.id}</Text>
       <Text>Inquilino CPF: {item.inquilino}</Text>
       <Text>Imóvel ID: {item.imovel}</Text>
-      <Text>Período: {item.inicio} a {item.fim}</Text>
+      <Text>Período: {formatarData(item.dataInicio)} a {formatarData(item.dataTermino)}</Text>
       <Text>Valor: R$ {item.valor}</Text>
       <View style={styles.botoes}>
         <Button title="Excluir" color="#d9534f" onPress={() => excluirContrato(item.id)} />
