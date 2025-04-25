@@ -16,7 +16,7 @@ export default function DashboardIA() {
   const [statusPagamentos, setStatusPagamentos] = useState(null);
   const screenWidth = Dimensions.get('window').width - 40;
 
-  
+
   const interpretarPergunta = (pergunta) => {
     const p = pergunta.toLowerCase();
 

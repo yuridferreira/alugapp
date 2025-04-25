@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../db/db';
 
 export default function CadastroImovelScreen({ route, navigation }) {
   const [id, setId] = useState('');
@@ -30,9 +30,8 @@ export default function CadastroImovelScreen({ route, navigation }) {
       return;
     }
 
-    const novoId = editando ? id : Date.now().toString();
     const imovel = {
-      id: novoId,
+      id: editando ? id : Date.now().toString(),
       endereco,
       tipo,
       andar,
@@ -41,7 +40,7 @@ export default function CadastroImovelScreen({ route, navigation }) {
     };
 
     try {
-      await AsyncStorage.setItem(`imovel_${novoId}`, JSON.stringify(imovel));
+      await db.saveImovel(imovel);
       Alert.alert(editando ? 'Imóvel atualizado!' : 'Imóvel cadastrado com sucesso!');
       navigation.navigate('ListaImoveis');
     } catch (error) {

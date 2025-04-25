@@ -1,39 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../db/db'; // ajuste conforme a localização real
+import { useNavigation } from '@react-navigation/native';
 
-export default function CadastroUsuarioScreen() {
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const navigation = useNavigation();
 
-  const handleSalvar = async () => {
+  const handleLogin = async () => {
     if (!email || !senha) {
       Alert.alert('Preencha todos os campos!');
       return;
     }
 
-    const key = 'usuario_' + email.toLowerCase();
-
     try {
-      const existente = await AsyncStorage.getItem(key);
-      if (existente) {
-        Alert.alert('Erro', 'Usuário já existe.');
-        return;
-      }
-
-      await AsyncStorage.setItem(key, JSON.stringify({ email, senha }));
-      Alert.alert('Usuário cadastrado com sucesso!');
+      const usuario = await db.authUsuario(email, senha);
+      Alert.alert('Bem-vindo', `Login bem-sucedido para ${usuario.email}`);
       setEmail('');
       setSenha('');
-    } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
-      Alert.alert('Erro ao cadastrar usuário');
+      navigation.navigate('Home'); // ou 'Dashboard', ou outro nome da sua tela principal
+    } catch (err) {
+      Alert.alert('Erro no login', err.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cadastro de Usuário</Text>
+      <Text style={styles.title}>Login</Text>
 
       <TextInput
         style={styles.input}
@@ -41,7 +35,9 @@ export default function CadastroUsuarioScreen() {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Senha"
@@ -49,7 +45,8 @@ export default function CadastroUsuarioScreen() {
         onChangeText={setSenha}
         secureTextEntry
       />
-      <Button title="Cadastrar" onPress={handleSalvar} />
+
+      <Button title="Entrar" onPress={handleLogin} />
     </View>
   );
 }
