@@ -11,21 +11,37 @@ export default function HistoricoScreen() {
       const lista = dados ? JSON.parse(dados) : [];
       setHistorico(lista);
     };
-
     carregarHistorico();
   }, []);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <Text style={styles.label}>Contrato #{item.id}</Text>
-      <Text>Inquilino: {item.inquilino}</Text>
-      <Text>Imóvel: {item.imovel}</Text>
-      <Text>Valor: R$ {item.valor}</Text>
-      <Text>Status: {item.status}</Text>
-      <Text>Data de Início: {item.dataInicio}</Text>
-      <Text>Data de Término: {item.dataTermino}</Text>
-    </View>
-  );
+  // Formata data no formato DD/MM/YYYY
+  const formatarData = (data) => {
+    if (!data) return '';
+    // se vier YYYY-MM-DD
+    if (data.includes('-')) {
+      const [ano, mes, dia] = data.split('-');
+      return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
+    }
+    // assume já está DD/MM/YYYY
+    return data;
+  };
+
+  const renderItem = ({ item }) => {
+    const dataInicioRaw = item.dataInicio || item.inicio;
+    const dataTerminoRaw = item.dataTermino || item.fim;
+
+    return (
+      <View style={styles.item}>
+        <Text style={styles.label}>Contrato #{item.id}</Text>
+        <Text>Inquilino: {item.inquilino}</Text>
+        <Text>Imóvel: {item.imovel}</Text>
+        <Text>Valor: R$ {Number(item.valor).toFixed(2)}</Text>
+        <Text>Status: {item.status}</Text>
+        <Text>Data de Início: {dataInicioRaw ? formatarData(dataInicioRaw) : 'Não definida'}</Text>
+        <Text>Data de Término: {dataTerminoRaw ? formatarData(dataTerminoRaw) : 'Não definida'}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -42,9 +58,6 @@ export default function HistoricoScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   title: { fontSize: 22, marginBottom: 20, textAlign: 'center' },
-  item: {
-    backgroundColor: '#f1f1f1', padding: 15,
-    borderRadius: 8, marginBottom: 15
-  },
+  item: { backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 15 },
   label: { fontWeight: 'bold', marginBottom: 5 },
 });
