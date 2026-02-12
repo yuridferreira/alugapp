@@ -21,7 +21,7 @@ export default function LoginScreen({ navigation }) {
         await AsyncStorage.setItem('usuario_admin', JSON.stringify({
           email: 'admin',
           senha: 'admin'
-        }));
+        }));        
         console.log('✅ Usuário admin criado');
       }
     };
