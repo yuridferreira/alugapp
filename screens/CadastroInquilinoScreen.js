@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 
 export default function CadastroInquilinoScreen() {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    const init = async () => {
+      try { await db.init(); } catch (e) { console.warn(e); }
+    };
+    init();
+  }, []);
 
   const handleSalvar = async () => {
     if (!nome || !cpf || !telefone || !email) {
@@ -15,14 +22,14 @@ export default function CadastroInquilinoScreen() {
     }
 
     const inquilino = {
-      nome,
+      name: nome,
       cpf,
-      telefone,
+      phone: telefone,
       email,
     };
 
     try {
-      await AsyncStorage.setItem(`inquilino_${cpf}`, JSON.stringify(inquilino));
+      await db.saveInquilino(inquilino);
       Alert.alert('Inquilino cadastrado com sucesso!');
       setNome('');
       setCpf('');

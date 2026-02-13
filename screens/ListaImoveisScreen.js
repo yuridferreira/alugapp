@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Button, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 
 export default function ListaImoveisScreen({ navigation }) {
   const [imoveis, setImoveis] = useState([]);
 
   const carregarImoveis = async () => {
     try {
-      const keys = await AsyncStorage.getAllKeys();
-      const imovelKeys = keys.filter(k => k.startsWith('imovel_'));
-      const entries = await AsyncStorage.multiGet(imovelKeys);
-      const lista = entries.map(([_, v]) => JSON.parse(v));
-      setImoveis(lista);
+        await db.init();
+        const lista = await db.getTodosImoveis();
+        const mapped = lista.map(i => ({
+          ...i,
+          tipo: i.tipo || i.meta?.tipo || i.title,
+          endereco: i.endereco || i.address || i.address || i.endereco || i.address,
+        }));
+        setImoveis(mapped);
     } catch (error) {
       console.error('Erro ao carregar imóveis:', error);
     }
@@ -23,7 +26,7 @@ export default function ListaImoveisScreen({ navigation }) {
       {
         text: 'Excluir', style: 'destructive', onPress: async () => {
           try {
-            await AsyncStorage.removeItem(`imovel_${id}`);
+            await db.deleteImovel(id);
             setImoveis(prev => prev.filter(i => i.id !== id));
           } catch (error) {
             console.error('Erro ao excluir imóvel:', error);

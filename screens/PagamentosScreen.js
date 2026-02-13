@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, Alert, FlatList } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 
 export default function PagamentosScreen({ navigation }) {
   const [contratos, setContratos] = useState([]);
@@ -9,22 +9,41 @@ export default function PagamentosScreen({ navigation }) {
   // 1) Carrega contratos ativos
   useEffect(() => {
     const carregarContratos = async () => {
-      const keys = await AsyncStorage.getAllKeys();
-      const contratoKeys = keys.filter(k => k.startsWith('contrato_'));
-      const entries = await AsyncStorage.multiGet(contratoKeys);
+      await db.init();
+      const listaRaw = await db.getTodosContratos();
 
-      const lista = entries.map(([_, v]) => {
-        const contrato = JSON.parse(v);
-        contrato.valor = Number(contrato.valor); // garante que seja número
-        return contrato;
+      // build per-screen cache of tenants and properties
+      const [allTenants, allProperties] = await Promise.all([db.getTodosInquilinos(), db.getTodosImoveis()]);
+      const tenantsByCpf = {};
+      const tenantsById = {};
+      (allTenants || []).forEach(t => { tenantsByCpf[String(t.cpf)] = t; if (t.id) tenantsById[String(t.id)] = t; });
+      const propertiesById = {};
+      (allProperties || []).forEach(p => { if (p.id) propertiesById[String(p.id)] = p; });
+
+      const lista = listaRaw.map(c => {
+        const base = {
+          id: c.id,
+          inquilino: c.inquilino || c.tenant_id || null,
+          imovel: c.imovel || c.property_id || null,
+          valor: Number(c.valor || c.rent_value || 0),
+          status: c.status || 'pendente'
+        };
+        let tenant = null;
+        if (base.inquilino) {
+          tenant = tenantsByCpf[String(base.inquilino)] || tenantsById[String(base.inquilino)] || null;
+        }
+        let property = null;
+        if (base.imovel) property = propertiesById[String(base.imovel)] || null;
+        return {
+          ...base,
+          tenantName: tenant?.nome || tenant?.name || null,
+          tenantCpf: tenant?.cpf || null,
+          propertyAddress: property?.endereco || property?.address || null,
+        };
       });
-
       setContratos(lista);
-
       const estados = {};
-      lista.forEach(c => {
-        estados[c.id] = c.status || 'pendente';
-      });
+      lista.forEach(c => { estados[c.id] = c.status || 'pendente'; });
       setStatusPagamentos(estados);
     };
 
@@ -33,10 +52,13 @@ export default function PagamentosScreen({ navigation }) {
 
   // 2) Salva no histórico
   const salvarHistorico = async (contrato) => {
-    const dados = await AsyncStorage.getItem('historico_alugueis');
-    const lista = dados ? JSON.parse(dados) : [];
-    lista.push(contrato);
-    await AsyncStorage.setItem('historico_alugueis', JSON.stringify(lista));
+    try {
+      await db.addHistory('contract', contrato.id, 'moved_to_history', contrato);
+      return true;
+    } catch (e) {
+      console.warn('Erro ao salvar historico no DB:', e);
+      return false;
+    }
   };
 
   // 3) Atualiza status; se for "finalizado", move para o histórico
@@ -45,20 +67,57 @@ export default function PagamentosScreen({ navigation }) {
       const idx = contratos.findIndex(c => c.id === id);
       if (idx < 0) return;
 
-      const contrato = { ...contratos[idx], status: novoStatus };
+      // fetch the canonical contract from DB (normalized) to avoid stale/local-only fields
+      let contratoDb = null;
+      try {
+        contratoDb = await db.getContratoById(id);
+      } catch (e) {
+        console.warn('Erro ao buscar contrato por id, usando local:', e);
+        contratoDb = null;
+      }
+
+      const contrato = { ...(contratoDb || contratos[idx]), status: novoStatus };
 
       if (novoStatus === 'finalizado') {
-        await salvarHistorico(contrato);
-        await AsyncStorage.removeItem(`contrato_${id}`);
-        setContratos(prev => prev.filter(c => c.id !== id));
-        setStatusPagamentos(prev => {
-          const copy = { ...prev };
-          delete copy[id];
-          return copy;
-        });
+        // ensure we save the canonical DB contract state into history
+        const toSaveHistory = contratoDb || contrato;
+        const ok = await salvarHistorico(toSaveHistory);
+        if (!ok) {
+          Alert.alert('Erro', 'Não foi possível salvar o histórico. Tente novamente.');
+          return;
+        }
+
+        try {
+          await db.deleteContrato(id);
+          setContratos(prev => prev.filter(c => c.id !== id));
+          setStatusPagamentos(prev => { const copy = { ...prev }; delete copy[id]; return copy; });
+          Alert.alert('Sucesso', 'Contrato movido para o histórico.');
+        } catch (e) {
+          console.error('Erro ao deletar contrato após salvar histórico:', e);
+          Alert.alert('Erro', 'Histórico salvo, mas não foi possível remover o contrato. Verifique os logs.');
+        }
       } else {
-        await AsyncStorage.setItem(`contrato_${id}`, JSON.stringify(contrato));
-        setContratos(prev => prev.map(c => c.id === id ? contrato : c));
+        // atualizar contrato no DB
+        const current = contratoDb || contrato;
+        const contratoParaSalvar = {
+          id: current.id,
+          // legacy fields for web storage
+          inquilino: current.inquilino,
+          imovel: current.imovel,
+          valor: current.valor,
+          dataInicio: current.dataInicio,
+          dataTermino: current.dataTermino,
+          status: novoStatus,
+          // sqlite fields
+          property_id: current.imovel,
+          tenant_id: current.inquilino,
+          rent_value: Number(current.valor) || 0,
+          start_date: current.dataInicio,
+          end_date: current.dataTermino,
+        };
+
+        await db.saveContrato(contratoParaSalvar);
+        setContratos(prev => prev.map(c => c.id === id ? { ...c, status: novoStatus } : c));
         setStatusPagamentos(prev => ({ ...prev, [id]: novoStatus }));
       }
     } catch (err) {

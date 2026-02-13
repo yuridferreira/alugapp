@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 import { Picker } from '@react-native-picker/picker';
 import * as Notifications from 'expo-notifications';
 
@@ -23,15 +23,11 @@ export default function CadastroContratoScreen({ navigation }) {
 
   useEffect(() => {
     async function carregarDados() {
-      const keys = await AsyncStorage.getAllKeys();
-      const inq = keys.filter(k => k.startsWith('inquilino_'));
-      const imo = keys.filter(k => k.startsWith('imovel_'));
-
-      const inquilinosRaw = await AsyncStorage.multiGet(inq);
-      const imoveisRaw = await AsyncStorage.multiGet(imo);
-
-      setInquilinos(inquilinosRaw.map(([_, v]) => JSON.parse(v)));
-      setImoveis(imoveisRaw.map(([_, v]) => JSON.parse(v)));
+      await db.init();
+      const inquilinosRaw = await db.getTodosInquilinos();
+      const imoveisRaw = await db.getTodosImoveis();
+      setInquilinos(inquilinosRaw.map(i => ({ nome: i.nome || i.name || '', cpf: i.cpf || i.cpf || (i.id ? String(i.id) : '') })));
+      setImoveis(imoveisRaw.map(i => ({ id: i.id, endereco: i.endereco || i.address || i.address || '', tipo: i.tipo || i.meta?.tipo || '' })));
     }
     carregarDados();
   }, []);
@@ -59,9 +55,15 @@ export default function CadastroContratoScreen({ navigation }) {
     const dataNotificacao = new Date(vencimento);
     dataNotificacao.setDate(dataNotificacao.getDate() - 3);
 
-    const imovelRaw = await AsyncStorage.getItem(`imovel_${contrato.imovel}`);
-    const imovel = imovelRaw ? JSON.parse(imovelRaw) : null;
-    const endereco = imovel?.endereco ?? contrato.imovel;
+  let imovel = null;
+  try {
+    imovel = await db.getImovelById(contrato.imovel);
+  } catch (e) {
+    console.warn('Erro ao buscar imóvel para notificação:', e);
+    // fallback para state
+    imovel = imoveis.find(i => String(i.id) === String(contrato.imovel));
+  }
+  const endereco = imovel?.endereco || imovel?.address || contrato.imovel;
 
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -85,17 +87,32 @@ export default function CadastroContratoScreen({ navigation }) {
 
     const contrato = {
       id: Date.now().toString(),
+      // legacy fields used by web AsyncStorage
       inquilino: selectedInquilino,
       imovel: selectedImovel,
       valor,
-      status: 'ativo', // ou "finalizado" conforme o seu caso
       dataInicio: dataInicioFormatada,
       dataTermino: dataFimFormatada,
+      status: 'ativo',
+      // fields used by SQLite
+      property_id: selectedImovel,
+      tenant_id: selectedInquilino,
+      start_date: dataInicioFormatada,
+      end_date: dataFimFormatada,
+      rent_value: Number(valor) || 0,
     };
 
     try {
-      await AsyncStorage.setItem(`contrato_${contrato.id}`, JSON.stringify(contrato));
-      await agendarNotificacao(contrato);
+      await db.saveContrato(contrato);
+      // fetch canonical saved contract (normalize fields) and use it for notification scheduling
+      let saved = null;
+      try {
+        saved = await db.getContratoById(contrato.id);
+      } catch (e) {
+        console.warn('Erro ao buscar contrato salvo, usando objeto local:', e);
+        saved = contrato;
+      }
+      await agendarNotificacao(saved);
       Alert.alert('Contrato cadastrado com sucesso!');
       navigation.navigate('ListaContratos');
     } catch (err) {

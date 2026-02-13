@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 
 export default function ListaInquilinosScreen({ navigation }) {
   const [inquilinos, setInquilinos] = useState([]);
@@ -8,13 +8,16 @@ export default function ListaInquilinosScreen({ navigation }) {
   useEffect(() => {
     const carregarInquilinos = async () => {
       try {
-        const keys = await AsyncStorage.getAllKeys();
-        const inquilinoKeys = keys.filter(k => k.startsWith('inquilino_'));
-
-        const entries = await AsyncStorage.multiGet(inquilinoKeys);
-        const lista = entries.map(([key, value]) => JSON.parse(value));
-
-        setInquilinos(lista);
+        await db.init();
+        const lista = await db.getTodosInquilinos();
+        // compatibilidade com chaves antigas
+        const mapped = lista.map(i => ({
+          nome: i.nome || i.name || '',
+          cpf: i.cpf || i.cpf || (i.id ? String(i.id) : ''),
+          telefone: i.telefone || i.phone || '',
+          email: i.email || ''
+        }));
+        setInquilinos(mapped);
       } catch (error) {
         console.error('Erro ao carregar inquilinos:', error);
       }
@@ -38,7 +41,7 @@ export default function ListaInquilinosScreen({ navigation }) {
 
       <FlatList
         data={inquilinos}
-        keyExtractor={(item) => item.cpf}
+        keyExtractor={(item) => item.cpf || Math.random().toString()}
         renderItem={renderItem}
         ListEmptyComponent={<Text style={styles.vazio}>Nenhum inquilino cadastrado.</Text>}
       />
