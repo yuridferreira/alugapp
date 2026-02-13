@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
 
 export default function DashboardIA() {
@@ -51,13 +51,10 @@ export default function DashboardIA() {
 
   useEffect(() => {
     const carregarDados = async () => {
-      const keys = await AsyncStorage.getAllKeys();
-      const contratoKeys = keys.filter(k => k.startsWith('contrato_'));
-      const imovelKeys = keys.filter(k => k.startsWith('imovel_'));
-      const inquilinoKeys = keys.filter(k => k.startsWith('inquilino_'));
-      const contratos = (await AsyncStorage.multiGet(contratoKeys)).map(([_, v]) => JSON.parse(v));
-      const imoveis = (await AsyncStorage.multiGet(imovelKeys)).map(([_, v]) => JSON.parse(v));
-      const inquilinos = (await AsyncStorage.multiGet(inquilinoKeys)).map(([_, v]) => JSON.parse(v));
+      await db.init();
+      const contratos = await db.getTodosContratos();
+      const imoveis = await db.getTodosImoveis();
+      const inquilinos = await db.getTodosInquilinos();
       setContratos(contratos);
       setImoveis(imoveis);
       setInquilinos(inquilinos);
@@ -69,14 +66,25 @@ export default function DashboardIA() {
       const statusMap = { pago: 0, pendente: 0, atrasado: 0 };
 
       contratos.forEach(c => {
-        const [d, m, a] = c.inicio.split('/');
-        const mes = `${m}/${a}`;
-        mesMap[mes] = (mesMap[mes] || 0) + 1;
+        // suportar formatos diferentes
+        const inicio = c.dataInicio || c.start_date || c.inicio || '';
+        const valorRaw = c.valor || c.rent_value || '0';
+        let dia = '';
+        let mes = '';
+        let ano = '';
+        if (inicio.includes('/')) {
+          [dia, mes, ano] = inicio.split('/');
+        } else if (inicio.includes('-')) {
+          [ano, mes, dia] = inicio.split('-');
+        }
+        const mesKey = mes && ano ? `${mes}/${ano}` : 'N/A';
+        mesMap[mesKey] = (mesMap[mesKey] || 0) + 1;
 
-        const valor = parseFloat((c.valor || '0').replace(',', '.'));
-        receitaMap[mes] = (receitaMap[mes] || 0) + valor;
+        const valor = parseFloat(String(valorRaw).toString().replace(',', '.')) || 0;
+        receitaMap[mesKey] = (receitaMap[mesKey] || 0) + valor;
 
-        imovelMap[c.imovel] = (imovelMap[c.imovel] || 0) + 1;
+        const imovelId = c.imovel || c.property_id || c.imovel;
+        imovelMap[imovelId] = (imovelMap[imovelId] || 0) + 1;
         statusMap[c.status || 'pendente'] += 1;
       });
 

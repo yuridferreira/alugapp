@@ -1,41 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Button, Alert, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import db from '../db/db';
 
 export default function ListaContratosScreen({ navigation }) {
   const [contratos, setContratos] = useState([]);
 
   const carregarContratos = async () => {
     try {
-      const keys = await AsyncStorage.getAllKeys();
-      const contratoKeys = keys.filter(k => k.startsWith('contrato_'));
-      const entries = await AsyncStorage.multiGet(contratoKeys);
-      const lista = entries.map(([key, v]) => {
-        const item = JSON.parse(v);
-        if (!item.id) item.id = key.replace('contrato_', '');
-        return item;
+      await db.init();
+      const listaRaw = await db.getTodosContratos();
+
+      // load tenants and properties once and build lookup maps (cache per screen)
+      const [allTenants, allProperties] = await Promise.all([db.getTodosInquilinos(), db.getTodosImoveis()]);
+      const tenantsByCpf = {};
+      const tenantsById = {};
+      (allTenants || []).forEach(t => { tenantsByCpf[String(t.cpf)] = t; if (t.id) tenantsById[String(t.id)] = t; });
+      const propertiesById = {};
+      (allProperties || []).forEach(p => { if (p.id) propertiesById[String(p.id)] = p; });
+
+      const lista = listaRaw.map(item => ({
+        id: item.id || item.id,
+        inquilino: item.inquilino || item.tenant_id || item.tenant || item.inquilino,
+        imovel: item.imovel || item.property_id || item.imovel,
+        dataInicio: item.dataInicio || item.start_date || item.dataInicio,
+        dataTermino: item.dataTermino || item.end_date || item.dataTermino,
+        valor: item.valor || item.rent_value || item.valor,
+        status: item.status || 'ativo'
+      }));
+
+      const enriched = lista.map(it => {
+        let tenant = null;
+        if (it.inquilino) {
+          tenant = tenantsByCpf[String(it.inquilino)] || tenantsById[String(it.inquilino)] || null;
+        }
+        const property = it.imovel ? propertiesById[String(it.imovel)] : null;
+        return {
+          ...it,
+          tenantName: tenant?.nome || tenant?.name || it.inquilino,
+          tenantCpf: tenant?.cpf || it.inquilino,
+          propertyAddress: property?.endereco || property?.address || String(it.imovel),
+        };
       });
-      setContratos(lista);
+      setContratos(enriched);
     } catch (error) {
       console.error('Erro ao carregar contratos:', error);
     }
   };
 
   const excluirContrato = async (id) => {
+    // fetch canonical contract to show more context in confirmation
+    let contrato = null;
+    try {
+      contrato = await db.getContratoById(id);
+    } catch (e) {
+      console.warn('Erro ao buscar contrato para exclusão:', e);
+      contrato = null;
+    }
+
+    const confirmMessage = contrato ? `Deseja excluir o contrato #${id}\nInquilino: ${contrato.inquilino || contrato.tenantName || '—'}\nImóvel: ${contrato.imovel || contrato.propertyAddress || '—'}` : 'Deseja excluir este contrato?';
+
     const execute = async () => {
       try {
-        const chave = `contrato_${id}`;
-        const exists = await AsyncStorage.getItem(chave);
-        console.log(`Chave ${chave} existe?`, !!exists);
-
-        if (!exists) {
-          Platform.OS === 'web'
-            ? alert(`Contrato ${chave} não encontrado.`)
-            : Alert.alert('Erro', `Contrato ${chave} não encontrado.`);
-          return;
-        }
-
-        await AsyncStorage.removeItem(chave);
+        await db.deleteContrato(id);
         setContratos(prev => prev.filter(c => c.id !== id));
         console.log(`Contrato ${id} excluído com sucesso.`);
       } catch (error) {
@@ -44,11 +70,11 @@ export default function ListaContratosScreen({ navigation }) {
     };
 
     if (Platform.OS === 'web') {
-      if (window.confirm('Deseja excluir este contrato?')) {
+      if (window.confirm(confirmMessage)) {
         await execute();
       }
     } else {
-      Alert.alert('Confirmação', 'Deseja excluir este contrato?', [
+      Alert.alert('Confirmação', confirmMessage, [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Excluir', style: 'destructive', onPress: execute },
       ]);
@@ -70,8 +96,8 @@ export default function ListaContratosScreen({ navigation }) {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.titulo}>Contrato {item.id}</Text>
-      <Text>Inquilino CPF: {item.inquilino}</Text>
-      <Text>Imóvel ID: {item.imovel}</Text>
+      <Text>Inquilino: {item.tenantName || item.tenantCpf}</Text>
+      <Text>Imóvel: {item.propertyAddress}</Text>
       <Text>Período: {formatarData(item.dataInicio)} a {formatarData(item.dataTermino)}</Text>
       <Text>Valor: R$ {item.valor}</Text>
       <View style={styles.botoes}>
