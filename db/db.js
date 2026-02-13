@@ -17,8 +17,19 @@ export const db = {
   async getTodosUsuarios() {
     const keys = await AsyncStorage.getAllKeys();
     const usuarioKeys = keys.filter(k => k.startsWith('usuario_'));
+    if (!usuarioKeys || usuarioKeys.length === 0) return [];
     const items = await AsyncStorage.multiGet(usuarioKeys);
-    return items.map(([_, value]) => JSON.parse(value));
+    return items
+      .map(([_, value]) => {
+        if (!value) return null;
+        try {
+          return JSON.parse(value);
+        } catch (err) {
+          console.warn('db.getTodosUsuarios: failed to parse item', err);
+          return null;
+        }
+      })
+      .filter(Boolean);
   },
 
   async deleteUsuario(email) {
@@ -36,8 +47,19 @@ export const db = {
   async getTodosInquilinos() {
     const keys = await AsyncStorage.getAllKeys();
     const inquilinoKeys = keys.filter(k => k.startsWith('inquilino_'));
+    if (!inquilinoKeys || inquilinoKeys.length === 0) return [];
     const items = await AsyncStorage.multiGet(inquilinoKeys);
-    return items.map(([key, value]) => JSON.parse(value));
+    return items
+      .map(([_, value]) => {
+        if (!value) return null;
+        try {
+          return JSON.parse(value);
+        } catch (err) {
+          console.warn('db.getTodosInquilinos: failed to parse item', err);
+          return null;
+        }
+      })
+      .filter(Boolean);
   },
 
   async saveContrato(contrato) {
@@ -48,8 +70,19 @@ export const db = {
   async getTodosContratos() {
     const keys = await AsyncStorage.getAllKeys();
     const contratoKeys = keys.filter(k => k.startsWith('contrato_'));
+    if (!contratoKeys || contratoKeys.length === 0) return [];
     const items = await AsyncStorage.multiGet(contratoKeys);
-    return items.map(([key, value]) => JSON.parse(value));
+    return items
+      .map(([_, value]) => {
+        if (!value) return null;
+        try {
+          return JSON.parse(value);
+        } catch (err) {
+          console.warn('db.getTodosContratos: failed to parse item', err);
+          return null;
+        }
+      })
+      .filter(Boolean);
   },
 
   async deleteContrato(id) {
@@ -68,8 +101,19 @@ export const db = {
   async getTodosImoveis() {
     const keys = await AsyncStorage.getAllKeys();
     const imovelKeys = keys.filter(k => k.startsWith('imovel_'));
+    if (!imovelKeys || imovelKeys.length === 0) return [];
     const items = await AsyncStorage.multiGet(imovelKeys);
-    return items.map(([_, value]) => JSON.parse(value));
+    return items
+      .map(([_, value]) => {
+        if (!value) return null;
+        try {
+          return JSON.parse(value);
+        } catch (err) {
+          console.warn('db.getTodosImoveis: failed to parse item', err);
+          return null;
+        }
+      })
+      .filter(Boolean);
   },
 
   async deleteImovel(id) {
