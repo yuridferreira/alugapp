@@ -24,7 +24,7 @@ Aplicativo construído com [React Native](https://reactnative.dev/) e [Expo](htt
 - [Expo](https://expo.dev/)
 - React Native
 - React Navigation
-- AsyncStorage (`@react-native-async-storage/async-storage`)
+- Banco de dados local (SQLite) -> migração futura para firebase
 - [Expo Vector Icons](https://icons.expo.fyi/)
 
 ---

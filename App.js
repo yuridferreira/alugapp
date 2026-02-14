@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { db } from './db/db';
 
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -25,13 +26,17 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   useEffect(() => {
-    const solicitarPermissao = async () => {
+    const inicializar = async () => {
+      // Initialize database
+      await db.init();
+      
+      // Request notification permission
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== 'granted') {
         alert('Permissão para notificações negada!');
       }
     };
-    solicitarPermissao();
+    inicializar();
   }, []);
 
   return (
