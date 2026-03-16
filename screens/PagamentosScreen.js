@@ -154,6 +154,9 @@ export default function PagamentosScreen({ navigation }) {
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
       />
+      <View style={{ marginTop: 12 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </View>
   );
 }

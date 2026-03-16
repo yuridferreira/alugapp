@@ -1,0 +1,81 @@
+import React, { useContext } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { AuthContext } from "../context/AuthContext";
+
+import LoginScreen from "../screens/LoginScreen";
+import HomeScreen from "../screens/HomeScreen";
+import CadastroInquilinoScreen from "../screens/CadastroInquilinoScreen";
+import ListaInquilinosScreen from "../screens/ListaInquilinosScreen";
+import ListaUsuariosScreen from "../screens/ListaUsuariosScreen";
+import CadastroContratoScreen from "../screens/CadastroContratoScreen";
+import CadastroImovelScreen from "../screens/CadastroImovelScreen";
+import ListaContratosScreen from "../screens/ListaContratosScreen";
+import ListaImoveisScreen from "../screens/ListaImoveisScreen";
+import PagamentosScreen from "../screens/PagamentosScreen";
+import HistoricoScreen from "../screens/HistoricoScreen";
+import ConfiguracoesScreen from "../screens/ConfiguracoesScreen";
+import AjudaScreen from "../screens/AjudaScreen";
+import DashboardIA from "../screens/DashboardIA";
+import CadastroUsuarioScreen from "../screens/CadastroUsuarioScreen";
+
+const Stack = createNativeStackNavigator();
+
+export default function AppNavigator() {
+  const { user, role, loading } = useContext(AuthContext);
+
+  if (loading) return null;
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+
+        {/* Não autenticado */}
+        {!user && (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="CadastroUsuario" component={CadastroUsuarioScreen} />
+          </>
+        )}
+
+        {/* Admin */}
+        {user && role === "admin" && (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="CadastroUsuario" component={CadastroUsuarioScreen} />
+            <Stack.Screen name="ListaUsuarios" component={ListaUsuariosScreen} />
+            <Stack.Screen name="DashboardIA" component={DashboardIA} />
+
+            <Stack.Screen name="CadastroInquilino" component={CadastroInquilinoScreen} />
+            <Stack.Screen name="ListaInquilinos" component={ListaInquilinosScreen} />
+            <Stack.Screen name="CadastroImovel" component={CadastroImovelScreen} />
+            <Stack.Screen name="ListaImoveis" component={ListaImoveisScreen} />
+            <Stack.Screen name="Contrato" component={CadastroContratoScreen} />
+            <Stack.Screen name="ListaContratos" component={ListaContratosScreen} />
+            <Stack.Screen name="Pagamentos" component={PagamentosScreen} />
+            <Stack.Screen name="Historico" component={HistoricoScreen} />
+            <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+            <Stack.Screen name="Ajuda" component={AjudaScreen} />
+          </>
+        )}
+
+        {/* Inquilino */}
+        {user && role === "inquilino" && (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Pagamentos" component={PagamentosScreen} />
+            <Stack.Screen name="Historico" component={HistoricoScreen} />
+            <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+            <Stack.Screen name="Ajuda" component={AjudaScreen} />
+          </>
+        )}
+
+        {/* Segurança extra */}
+        {user && !role && (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        )}
+
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}

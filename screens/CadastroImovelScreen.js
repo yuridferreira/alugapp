@@ -31,7 +31,7 @@ export default function CadastroImovelScreen({ route, navigation }) {
     }
 
     const imovel = {
-      id: editando ? id : Date.now().toString(),
+      ...(editando ? { id } : {}),
       endereco,
       tipo,
       andar,
@@ -60,6 +60,9 @@ export default function CadastroImovelScreen({ route, navigation }) {
       <TextInput style={styles.input} placeholder="Torre" value={torre} onChangeText={setTorre} />
 
       <Button title={editando ? 'Salvar Alterações' : 'Cadastrar'} onPress={handleSalvar} />
+      <View style={{ marginTop: 12 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </View>
   );
 }

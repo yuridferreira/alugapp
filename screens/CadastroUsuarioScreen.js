@@ -1,44 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import db from '../db/db';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
 
 export default function CadastroUsuarioScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await db.init();
-      } catch (e) {
-        console.warn('Erro ao inicializar DB:', e);
-      }
-    };
-    init();
-  }, []);
-
   const handleCadastro = async () => {
     if (!email || !senha || !name) {
-      Alert.alert('Preencha todos os campos!');
+      Alert.alert('Erro', 'Preencha todos os campos!');
       return;
     }
 
     try {
-      // Verifica se usuário já existe
-      const existing = await db.getUsuarioByEmail(email.toLowerCase());
-      if (existing) {
-        Alert.alert('Erro', 'Já existe um usuário com este email');
-        return;
-      }
+      // Cria usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email.toLowerCase(),
+        senha
+      );
 
-      await db.saveUsuario({ name, email: email.toLowerCase(), password: senha, role: 'user' });
+      const uid = userCredential.user.uid;
+
+      // Salva dados adicionais no Firestore
+      await setDoc(doc(db, 'usuarios', uid), {
+        nome: name,
+        email: email.toLowerCase(),
+        role: 'user',
+        criadoEm: new Date()
+      });
+
       Alert.alert('Sucesso', 'Usuário cadastrado com sucesso');
-      setName(''); setEmail(''); setSenha('');
+
+      setName('');
+      setEmail('');
+      setSenha('');
+
       navigation.goBack();
-    } catch (err) {
-      console.error('Erro ao cadastrar usuário:', err);
-      Alert.alert('Erro', err.message || 'Não foi possível cadastrar o usuário');
+
+    } catch (error) {
+      Alert.alert('Erro', error.message);
     }
   };
 
@@ -73,6 +77,9 @@ export default function CadastroUsuarioScreen({ navigation }) {
       <TouchableOpacity style={styles.button} onPress={handleCadastro}>
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
+      <View style={{ marginTop: 12 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </View>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../db/db';
 
-export default function HistoricoScreen() {
+export default function HistoricoScreen({ navigation }) {
   const [historico, setHistorico] = useState([]);
 
   useEffect(() => {
@@ -116,6 +116,7 @@ export default function HistoricoScreen() {
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
       />
+      <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
     </View>
   );
 }

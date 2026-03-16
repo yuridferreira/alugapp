@@ -86,7 +86,6 @@ export default function CadastroContratoScreen({ navigation }) {
     const dataFimFormatada = converterDataParaBanco(fim);
 
     const contrato = {
-      id: Date.now().toString(),
       // legacy fields used by web AsyncStorage
       inquilino: selectedInquilino,
       imovel: selectedImovel,
@@ -103,14 +102,14 @@ export default function CadastroContratoScreen({ navigation }) {
     };
 
     try {
-      await db.saveContrato(contrato);
+      const savedId = await db.saveContrato(contrato);
       // fetch canonical saved contract (normalize fields) and use it for notification scheduling
       let saved = null;
       try {
-        saved = await db.getContratoById(contrato.id);
+        saved = await db.getContratoById(savedId);
       } catch (e) {
         console.warn('Erro ao buscar contrato salvo, usando objeto local:', e);
-        saved = contrato;
+        saved = { ...contrato, id: savedId };
       }
       await agendarNotificacao(saved);
       Alert.alert('Contrato cadastrado com sucesso!');
@@ -172,6 +171,9 @@ export default function CadastroContratoScreen({ navigation }) {
       />
 
       <Button title="Salvar Contrato" onPress={handleSalvar} />
+      <View style={{ marginTop: 12 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </ScrollView>
   );
 }
