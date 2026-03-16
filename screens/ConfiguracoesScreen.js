@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 
-export default function ConfiguracoesScreen() {
+export default function ConfiguracoesScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configurações</Text>
+      <View style={{ marginTop: 20 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </View>
   );
 }

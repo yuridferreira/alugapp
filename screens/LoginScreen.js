@@ -1,23 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import db from '../db/db';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
-  useEffect(() => {
-    const setup = async () => {
-      try {
-        await db.init();
-        // cria usuário admin padrão (upsert)
-        await db.saveUsuario({ name: 'Admin', email: 'admin', password: 'admin', role: 'admin' });
-      } catch (err) {
-        console.warn('Erro inicializando DB:', err);
-      }
-    };
-    setup();
-  }, []);
 
   const handleLogin = async () => {
     if (!email || !senha) {
@@ -26,12 +14,11 @@ export default function LoginScreen({ navigation }) {
     }
 
     try {
-      const user = await db.authUsuario(email, senha);
-      Alert.alert('Login bem-sucedido!');
-      navigation.navigate('Home');
+      await signInWithEmailAndPassword(auth, email, senha);
+      // Não precisa navegar manualmente
+      // AuthContext vai redirecionar automaticamente
     } catch (error) {
-      console.error('Erro ao verificar login:', error);
-      Alert.alert('Erro no login', error.message || 'Erro ao verificar login');
+      Alert.alert('Erro no login', error.message);
     }
   };
 
@@ -58,6 +45,10 @@ export default function LoginScreen({ navigation }) {
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('CadastroUsuario')}>
+        <Text style={{ marginTop: 15 }}>Criar conta</Text>
       </TouchableOpacity>
     </View>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import db from '../db/db';
 
-export default function CadastroInquilinoScreen() {
+export default function CadastroInquilinoScreen({ navigation }) {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -29,7 +29,8 @@ export default function CadastroInquilinoScreen() {
     };
 
     try {
-      await db.saveInquilino(inquilino);
+      const id = await db.saveInquilino(inquilino);
+      console.log('Inquilino salvo com id', id);
       Alert.alert('Inquilino cadastrado com sucesso!');
       setNome('');
       setCpf('');
@@ -37,7 +38,7 @@ export default function CadastroInquilinoScreen() {
       setEmail('');
     } catch (error) {
       console.error('Erro ao salvar inquilino:', error);
-      Alert.alert('Erro ao salvar o inquilino.');
+      Alert.alert('Erro ao salvar o inquilino', error.message || error.toString());
     }
   };
 
@@ -74,6 +75,9 @@ export default function CadastroInquilinoScreen() {
       />
 
       <Button title="Salvar" onPress={handleSalvar} />
+      <View style={{ marginTop: 12 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </View>
   );
 }

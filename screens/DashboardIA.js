@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Button } from 'react-native';
 import db from '../db/db';
 import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
 
-export default function DashboardIA() {
+export default function DashboardIA({ navigation }) {
   const [input, setInput] = useState('');
   const [resposta, setResposta] = useState('');
   const [contratos, setContratos] = useState([]);
@@ -185,6 +185,9 @@ export default function DashboardIA() {
           <Text style={styles.responseText}>{resposta}</Text>
         </View>
       )}
+      <View style={{ width: '100%', marginTop: 16 }}>
+        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+      </View>
     </ScrollView>
   );
 }
