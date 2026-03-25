@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ListaUsuariosScreen({ navigation }) {
@@ -31,26 +31,30 @@ export default function ListaUsuariosScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📄 Lista de Usuários</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>👥 Lista de Usuários</Text>
 
-      <FlatList
-        data={usuarios}
-        keyExtractor={(item) => item.email}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vazio}>Nenhum usuário cadastrado.</Text>}
-      />
+        <FlatList
+          data={usuarios}
+          keyExtractor={(item) => item.email}
+          renderItem={renderItem}
+          ListEmptyComponent={<Text style={styles.vazio}>Nenhum usuário cadastrado.</Text>}
+          contentContainerStyle={styles.listContainer}
+        />
 
-      <View style={styles.voltar}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        <View style={styles.fixedBottom}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#fff' },
   container: {
-    flex: 1, padding: 20, backgroundColor: '#fff',
+    flex: 1, padding: 20,
   },
   title: {
     fontSize: 24, marginBottom: 20, textAlign: 'center',
@@ -63,11 +67,12 @@ const styles = StyleSheet.create({
   },
   detalhe: {
     fontSize: 14,
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
   },
   vazio: {
     textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999',
   },
-  voltar: {
-    marginTop: 20,
-  },
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

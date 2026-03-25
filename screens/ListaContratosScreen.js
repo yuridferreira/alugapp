@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, Alert, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Alert, Platform, SafeAreaView } from 'react-native';
 import db from '../db/db';
 
 export default function ListaContratosScreen({ navigation }) {
@@ -96,10 +96,10 @@ export default function ListaContratosScreen({ navigation }) {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.titulo}>Contrato {item.id}</Text>
-      <Text>Inquilino: {item.tenantName || item.tenantCpf}</Text>
-      <Text>Imóvel: {item.propertyAddress}</Text>
-      <Text>Período: {formatarData(item.dataInicio)} a {formatarData(item.dataTermino)}</Text>
-      <Text>Valor: R$ {item.valor}</Text>
+      <Text style={styles.text}>Inquilino: {item.tenantName || item.tenantCpf}</Text>
+      <Text style={styles.text}>Imóvel: {item.propertyAddress}</Text>
+      <Text style={styles.text}>Período: {formatarData(item.dataInicio)} a {formatarData(item.dataTermino)}</Text>
+      <Text style={styles.text}>Valor: R$ {item.valor}</Text>
       <View style={styles.botoes}>
         <Button title="Excluir" color="#d9534f" onPress={() => excluirContrato(item.id)} />
       </View>
@@ -107,23 +107,27 @@ export default function ListaContratosScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📃 Lista de Contratos</Text>
-      <FlatList
-        data={contratos}
-        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vazio}>Nenhum contrato cadastrado.</Text>}
-      />
-      <View style={styles.rodape}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>📝 Lista de Contratos</Text>
+        <FlatList
+          data={contratos}
+          keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={<Text style={styles.vazio}>Nenhum contrato cadastrado.</Text>}
+          contentContainerStyle={styles.listContainer}
+        />
+        <View style={styles.fixedBottom}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20 },
   title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
   item: {
     backgroundColor: '#f1f1f1', padding: 15,
@@ -131,6 +135,11 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 18, fontWeight: 'bold'
+  },
+  text: {
+    flexWrap: 'wrap',
+    numberOfLines: 2,
+    ellipsizeMode: 'tail'
   },
   botoes: {
     marginTop: 10,
@@ -140,7 +149,6 @@ const styles = StyleSheet.create({
   vazio: {
     textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999'
   },
-  rodape: {
-    marginTop: 20
-  }
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Alert, SafeAreaView } from 'react-native';
 import db from '../db/db';
 
 export default function ListaImoveisScreen({ navigation }) {
@@ -44,10 +44,10 @@ export default function ListaImoveisScreen({ navigation }) {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.titulo}>{item.tipo}</Text>
-      <Text>Endereço: {item.endereco}</Text>
-      <Text>Andar: {item.andar}</Text>
-      <Text>Completo: {item.completo}</Text>
-      <Text>Torre: {item.torre}</Text>
+      <Text style={styles.text}>Endereço: {item.endereco}</Text>
+      <Text style={styles.text}>Andar: {item.andar}</Text>
+      <Text style={styles.text}>Completo: {item.completo}</Text>
+      <Text style={styles.text}>Torre: {item.torre}</Text>
       <View style={styles.botoes}>
         <Button title="Editar" onPress={() => navigation.navigate('CadastroImovel', { editar: item })} />
         <Button title="Excluir" color="#d9534f" onPress={() => excluirImovel(item.id)} />
@@ -56,23 +56,27 @@ export default function ListaImoveisScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📃 Lista de Imóveis</Text>
-      <FlatList
-        data={imoveis}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vazio}>Nenhum imóvel cadastrado.</Text>}
-      />
-      <View style={styles.rodape}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>🏢 Lista de Imóveis</Text>
+        <FlatList
+          data={imoveis}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={<Text style={styles.vazio}>Nenhum imóvel cadastrado.</Text>}
+          contentContainerStyle={styles.listContainer}
+        />
+        <View style={styles.fixedBottom}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20 },
   title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
   item: {
     backgroundColor: '#f1f1f1', padding: 15,
@@ -81,13 +85,17 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 18, fontWeight: 'bold'
   },
+  text: {
+    flexWrap: 'wrap',
+    numberOfLines: 2,
+    ellipsizeMode: 'tail'
+  },
   botoes: {
     flexDirection: 'row', justifyContent: 'space-between', marginTop: 10
   },
   vazio: {
     textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999'
   },
-  rodape: {
-    marginTop: 20
-  }
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

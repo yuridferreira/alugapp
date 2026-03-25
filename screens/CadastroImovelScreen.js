@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { commonStyles, colors } from '../styles/commonStyles';
 import { db } from '../db/db';
 
 export default function CadastroImovelScreen({ route, navigation }) {
@@ -50,28 +51,28 @@ export default function CadastroImovelScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{editando ? 'Editar Imóvel' : 'Cadastro de Imóvel'}</Text>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.title}>{editando ? 'Editar Imóvel' : 'Cadastro de Imóvel'}</Text>
 
-      <TextInput style={styles.input} placeholder="Endereço" value={endereco} onChangeText={setEndereco} />
-      <TextInput style={styles.input} placeholder="Tipo (Casa, Apto...)" value={tipo} onChangeText={setTipo} />
-      <TextInput style={styles.input} placeholder="Andar" value={andar} onChangeText={setAndar} />
-      <TextInput style={styles.input} placeholder="Completo" value={completo} onChangeText={setCompleto} />
-      <TextInput style={styles.input} placeholder="Torre" value={torre} onChangeText={setTorre} />
+        <TextInput style={styles.input} placeholder="Endereço" value={endereco} onChangeText={setEndereco} />
+        <TextInput style={styles.input} placeholder="Tipo (Casa, Apto...)" value={tipo} onChangeText={setTipo} />
+        <TextInput style={styles.input} placeholder="Andar" value={andar} onChangeText={setAndar} />
+        <TextInput style={styles.input} placeholder="Completo" value={completo} onChangeText={setCompleto} />
+        <TextInput style={styles.input} placeholder="Torre" value={torre} onChangeText={setTorre} />
 
-      <Button title={editando ? 'Salvar Alterações' : 'Cadastrar'} onPress={handleSalvar} />
-      <View style={{ marginTop: 12 }}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-      </View>
-    </View>
+        <Button title={editando ? 'Salvar Alterações' : 'Cadastrar'} onPress={handleSalvar} />
+        <View style={{ marginTop: 12 }}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff', justifyContent: 'center' },
-  title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
-  input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 6,
-    padding: 10, marginBottom: 12,
-  },
+  container: { flex: 1 },
+  scrollContainer: { flexGrow: 1, padding: 20, backgroundColor: colors.background, justifyContent: 'center' },
+  title: commonStyles.title,
+  input: commonStyles.input,
 });

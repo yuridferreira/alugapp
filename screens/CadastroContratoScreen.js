@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { commonStyles, colors } from '../styles/commonStyles';
 import db from '../db/db';
 import { Picker } from '@react-native-picker/picker';
 import * as Notifications from 'expo-notifications';
@@ -121,71 +122,67 @@ export default function CadastroContratoScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Cadastro de Contrato</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Cadastro de Contrato</Text>
 
-      <Text>Inquilino:</Text>
-      <Picker
-        selectedValue={selectedInquilino}
-        onValueChange={setSelectedInquilino}
-        style={styles.input}
-      >
-        <Picker.Item label="Selecione..." value="" />
-        {inquilinos.map(i => (
-          <Picker.Item key={i.cpf} label={i.nome} value={i.cpf} />
-        ))}
-      </Picker>
+        <Text>Inquilino:</Text>
+        <Picker
+          selectedValue={selectedInquilino}
+          onValueChange={setSelectedInquilino}
+          style={styles.input}
+        >
+          <Picker.Item label="Selecione..." value="" />
+          {inquilinos.map(i => (
+            <Picker.Item key={i.cpf} label={i.nome} value={i.cpf} />
+          ))}
+        </Picker>
 
-      <Text>Imóvel:</Text>
-      <Picker
-        selectedValue={selectedImovel}
-        onValueChange={setSelectedImovel}
-        style={styles.input}
-      >
-        <Picker.Item label="Selecione..." value="" />
-        {imoveis.map(i => (
-          <Picker.Item key={i.id} label={i.endereco} value={i.id} />
-        ))}
-      </Picker>
+        <Text>Imóvel:</Text>
+        <Picker
+          selectedValue={selectedImovel}
+          onValueChange={setSelectedImovel}
+          style={styles.input}
+        >
+          <Picker.Item label="Selecione..." value="" />
+          {imoveis.map(i => (
+            <Picker.Item key={i.id} label={i.endereco} value={i.id} />
+          ))}
+        </Picker>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Data de Início (DD/MM/AAAA)"
-        value={inicio}
-        onChangeText={t => setInicio(formatarData(t))}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Data de Fim (DD/MM/AAAA)"
-        value={fim}
-        onChangeText={t => setFim(formatarData(t))}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Valor (R$)"
-        value={valor}
-        onChangeText={setValor}
-        keyboardType="numeric"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Data de Início (DD/MM/AAAA)"
+          value={inicio}
+          onChangeText={t => setInicio(formatarData(t))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Data de Fim (DD/MM/AAAA)"
+          value={fim}
+          onChangeText={t => setFim(formatarData(t))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Valor (R$)"
+          value={valor}
+          onChangeText={setValor}
+          keyboardType="numeric"
+        />
 
-      <Button title="Salvar Contrato" onPress={handleSalvar} />
-      <View style={{ marginTop: 12 }}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-      </View>
-    </ScrollView>
+        <Button title="Salvar Contrato" onPress={handleSalvar} />
+        <View style={{ marginTop: 12 }}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: '#fff', flexGrow: 1 },
-  title: { fontSize: 22, marginBottom: 20, textAlign: 'center' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 12,
-  },
+  container: { padding: 20, backgroundColor: colors.background },
+  title: commonStyles.title,
+  input: commonStyles.input,
 });

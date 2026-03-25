@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, SafeAreaView } from 'react-native';
 import db from '../db/db';
+import { commonStyles, colors } from '../styles/commonStyles';
 
 export default function ListaInquilinosScreen({ navigation }) {
   const [inquilinos, setInquilinos] = useState([]);
@@ -27,52 +28,51 @@ export default function ListaInquilinosScreen({ navigation }) {
   }, []);
 
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
+    <View style={commonStyles.card}>
       <Text style={styles.nome}>{item.nome}</Text>
-      <Text style={styles.detalhe}>CPF: {item.cpf}</Text>
-      <Text style={styles.detalhe}>Telefone: {item.telefone}</Text>
-      <Text style={styles.detalhe}>Email: {item.email}</Text>
+      <Text style={commonStyles.textSecondary}>CPF: {item.cpf}</Text>
+      <Text style={commonStyles.textSecondary}>Telefone: {item.telefone}</Text>
+      <Text style={commonStyles.textSecondary}>Email: {item.email}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📋 Lista de Inquilinos</Text>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <View style={styles.container}>
+        <Text style={commonStyles.title}>Lista de Inquilinos</Text>
 
-      <FlatList
-        data={inquilinos}
-        keyExtractor={(item) => item.cpf || Math.random().toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vazio}>Nenhum inquilino cadastrado.</Text>}
-      />
+        <FlatList
+          data={inquilinos}
+          keyExtractor={(item) => item.cpf || Math.random().toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={<Text style={styles.vazio}>Nenhum inquilino cadastrado.</Text>}
+          contentContainerStyle={styles.listContainer}
+        />
 
-      <View style={styles.voltar}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        <View style={styles.fixedBottom}>
+          <View style={commonStyles.button}>
+            <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} color="#fff" />
+          </View>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, padding: 20, backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24, marginBottom: 20, textAlign: 'center',
-  },
-  item: {
-    backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 10,
-  },
+  container: commonStyles.container,
   nome: {
-    fontSize: 18, fontWeight: 'bold',
-  },
-  detalhe: {
-    fontSize: 14,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 5,
   },
   vazio: {
-    textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999',
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+    color: colors.textSecondary,
   },
-  voltar: {
-    marginTop: 20,
-  },
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

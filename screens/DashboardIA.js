@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Button, KeyboardAvoidingView, SafeAreaView } from 'react-native';
+import { commonStyles, colors } from '../styles/commonStyles';
 import db from '../db/db';
 import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
 
@@ -131,64 +132,68 @@ export default function DashboardIA({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>📊 Dashboard com IA</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>📊 Dashboard com IA</Text>
 
-      {contratosPorMes && (
-        <View style={styles.chartBox}>
-          <Text style={styles.chartTitle}>Contratos por Mês</Text>
-          <BarChart data={contratosPorMes} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
-        </View>
-      )}
+          {contratosPorMes && (
+            <View style={styles.chartBox}>
+              <Text style={styles.chartTitle}>Contratos por Mês</Text>
+              <BarChart data={contratosPorMes} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
+            </View>
+          )}
 
-      {receitaPorMes && (
-        <View style={styles.chartBox}>
-          <Text style={styles.chartTitle}>Receita por Mês</Text>
-          <LineChart data={receitaPorMes} width={screenWidth} height={200} chartConfig={chartConfig} bezier style={styles.chart} />
-        </View>
-      )}
+          {receitaPorMes && (
+            <View style={styles.chartBox}>
+              <Text style={styles.chartTitle}>Receita por Mês</Text>
+              <LineChart data={receitaPorMes} width={screenWidth} height={200} chartConfig={chartConfig} bezier style={styles.chart} />
+            </View>
+          )}
 
-      {imoveisMaisAlugados && (
-        <View style={styles.chartBox}>
-          <Text style={styles.chartTitle}>Imóveis mais Alugados</Text>
-          <BarChart data={imoveisMaisAlugados} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
-        </View>
-      )}
+          {imoveisMaisAlugados && (
+            <View style={styles.chartBox}>
+              <Text style={styles.chartTitle}>Imóveis mais Alugados</Text>
+              <BarChart data={imoveisMaisAlugados} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
+            </View>
+          )}
 
-      {tiposImoveis && tiposImoveis.length > 0 && (
-        <View style={styles.chartBox}>
-          <Text style={styles.chartTitle}>Tipos de Imóveis</Text>
-          <PieChart data={tiposImoveis} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
-        </View>
-      )}
+          {tiposImoveis && tiposImoveis.length > 0 && (
+            <View style={styles.chartBox}>
+              <Text style={styles.chartTitle}>Tipos de Imóveis</Text>
+              <PieChart data={tiposImoveis} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
+            </View>
+          )}
 
-      {statusPagamentos && (
-        <View style={styles.chartBox}>
-          <Text style={styles.chartTitle}>Status dos Pagamentos</Text>
-          <PieChart data={statusPagamentos} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
-        </View>
-      )}
+          {statusPagamentos && (
+            <View style={styles.chartBox}>
+              <Text style={styles.chartTitle}>Status dos Pagamentos</Text>
+              <PieChart data={statusPagamentos} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
+            </View>
+          )}
 
-      <Text style={styles.title}>🤖 Assistente de IA (offline)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite sua pergunta..."
-        value={input}
-        onChangeText={setInput}
-      />
-      <TouchableOpacity style={styles.button} onPress={handlePerguntar}>
-        <Text style={styles.buttonText}>Perguntar</Text>
-      </TouchableOpacity>
+          <Text style={styles.title}>🤖 Assistente de IA (offline)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite sua pergunta..."
+            value={input}
+            onChangeText={setInput}
+          />
+          <TouchableOpacity style={styles.button} onPress={handlePerguntar}>
+            <Text style={styles.buttonText}>Perguntar</Text>
+          </TouchableOpacity>
 
-      {resposta !== '' && (
-        <View style={styles.responseBox}>
-          <Text style={styles.responseText}>{resposta}</Text>
-        </View>
-      )}
-      <View style={{ width: '100%', marginTop: 16 }}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-      </View>
-    </ScrollView>
+          {resposta !== '' && (
+            <View style={styles.responseBox}>
+              <Text style={styles.responseText}>{resposta}</Text>
+            </View>
+          )}
+          <View style={{ width: '100%', marginTop: 16 }}>
+            <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -229,24 +234,9 @@ const styles = StyleSheet.create({
   chart: {
     borderRadius: 8,
   },
-  input: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: '#0066cc',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
+  input: commonStyles.input,
+  button: commonStyles.button,
+  buttonText: commonStyles.buttonText,
   responseBox: {
     marginTop: 30,
     padding: 15,

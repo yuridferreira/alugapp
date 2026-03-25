@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Button, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../db/db';
 
@@ -98,32 +98,44 @@ export default function HistoricoScreen({ navigation }) {
     return (
       <View style={styles.item}>
         <Text style={styles.label}>Contrato #{item.id}</Text>
-        <Text>Inquilino: {item.inquilino || '—'}</Text>
-        <Text>Imóvel: {item.imovel || '—'}</Text>
-        <Text>Valor: R$ {item.valor ? Number(item.valor).toFixed(2) : '—'}</Text>
-        <Text>Status: {item.status || '—'}</Text>
-        <Text>Data de Início: {dataInicioRaw ? formatarData(String(dataInicioRaw)) : 'Não definida'}</Text>
-        <Text>Data de Término: {dataTerminoRaw ? formatarData(String(dataTerminoRaw)) : 'Não definida'}</Text>
+        <Text style={styles.text}>Inquilino: {item.inquilino || '—'}</Text>
+        <Text style={styles.text}>Imóvel: {item.imovel || '—'}</Text>
+        <Text style={styles.text}>Valor: R$ {item.valor ? Number(item.valor).toFixed(2) : '—'}</Text>
+        <Text style={styles.text}>Status: {item.status || '—'}</Text>
+        <Text style={styles.text}>Data de Início: {dataInicioRaw ? formatarData(String(dataInicioRaw)) : 'Não definida'}</Text>
+        <Text style={styles.text}>Data de Término: {dataTerminoRaw ? formatarData(String(dataTerminoRaw)) : 'Não definida'}</Text>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Histórico de Aluguéis</Text>
-      <FlatList
-        data={historico}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-      />
-      <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>🗃 Histórico de Aluguéis</Text>
+        <FlatList
+          data={historico}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+        />
+        <View style={styles.fixedBottom}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20 },
   title: { fontSize: 22, marginBottom: 20, textAlign: 'center' },
   item: { backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 15 },
   label: { fontWeight: 'bold', marginBottom: 5 },
+  text: {
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
+  },
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

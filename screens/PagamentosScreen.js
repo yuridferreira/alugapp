@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, FlatList } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, FlatList, SafeAreaView } from 'react-native';
 import db from '../db/db';
 
 export default function PagamentosScreen({ navigation }) {
@@ -130,41 +130,51 @@ export default function PagamentosScreen({ navigation }) {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.label}>Contrato #{item.id}</Text>
-      <Text>Inquilino: {item.inquilino}</Text>
-      <Text>Imóvel: {item.imovel}</Text>
-      <Text>
+      <Text style={styles.text}>Inquilino: {item.inquilino}</Text>
+      <Text style={styles.text}>Imóvel: {item.imovel}</Text>
+      <Text style={styles.text}>
         Valor: R$ {typeof item.valor === 'number' && !isNaN(item.valor) ? item.valor.toFixed(2) : 'Valor inválido'}
       </Text>
-      <Text>Status: {statusPagamentos[item.id] || 'pendente'}</Text>
+      <Text style={styles.text}>Status: {statusPagamentos[item.id] || 'pendente'}</Text>
 
       <View style={styles.botoes}>
-        <Button title="PAGO"      color="#28a745" onPress={() => atualizarStatus(item.id, 'pago')} />
-        <Button title="PENDENTE"  color="#ffc107" onPress={() => atualizarStatus(item.id, 'pendente')} />
-        <Button title="ATRASADO"  color="#dc3545" onPress={() => atualizarStatus(item.id, 'atrasado')} />
-        <Button title="FINALIZAR" color="#6c757d" onPress={() => atualizarStatus(item.id, 'finalizado')} />
+        <Button title="PAGO"      color="#28a745" onPress={() => atualizarStatus(item.id, 'Pago')} />
+        <Button title="PENDENTE"  color="#ffc107" onPress={() => atualizarStatus(item.id, 'Pendente')} />
+        <Button title="ATRASADO"  color="#dc3545" onPress={() => atualizarStatus(item.id, 'Atrasado')} />
+        <Button title="FINALIZAR" color="#6c757d" onPress={() => atualizarStatus(item.id, 'Finalizado')} />
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Status de Pagamentos</Text>
-      <FlatList
-        data={contratos}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderItem}
-      />
-      <View style={{ marginTop: 12 }}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.title}>🧾 Status de Pagamentos</Text>
+        <FlatList
+          data={contratos}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+        />
+        <View style={styles.fixedBottom}>
+          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, padding: 20 },
   title:     { fontSize: 22, marginBottom: 20, textAlign: 'center' },
   item:      { backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 15 },
   label:     { fontWeight: 'bold', marginBottom: 5 },
+  text: {
+    numberOfLines: 1,
+    ellipsizeMode: 'tail'
+  },
   botoes:    { flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 },
+  listContainer: { paddingBottom: 80 },
+  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
 });

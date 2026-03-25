@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, KeyboardAvoidingView, ScrollView, SafeAreaView } from 'react-native';
+import { commonStyles, colors } from '../styles/commonStyles';
 import db from '../db/db';
 
 export default function CadastroInquilinoScreen({ navigation }) {
@@ -43,54 +44,59 @@ export default function CadastroInquilinoScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Cadastro de Inquilino</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.title}>Cadastro de Inquilino</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome"
-        value={nome}
-        onChangeText={setNome}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="CPF"
-        value={cpf}
-        onChangeText={setCpf}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Telefone"
-        value={telefone}
-        onChangeText={setTelefone}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Nome"
+            value={nome}
+            onChangeText={setNome}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="CPF"
+            value={cpf}
+            onChangeText={setCpf}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Telefone"
+            value={telefone}
+            onChangeText={setTelefone}
+            keyboardType="phone-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
 
-      <Button title="Salvar" onPress={handleSalvar} />
-      <View style={{ marginTop: 12 }}>
-        <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-      </View>
-    </View>
+          <Button title="Salvar" onPress={handleSalvar} />
+          <View style={{ marginTop: 12 }}>
+            <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: commonStyles.safeArea,
   container: {
-    flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff',
+    flex: 1,
   },
-  title: {
-    fontSize: 24, marginBottom: 20, textAlign: 'center',
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
   },
-  input: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 6,
-    padding: 10, marginBottom: 12,
-  },
+  title: commonStyles.title,
+  input: commonStyles.input,
 });
