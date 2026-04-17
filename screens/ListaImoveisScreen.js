@@ -1,38 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, Alert, SafeAreaView } from 'react-native';
+import { SafeAreaView, View, Text, FlatList, StyleSheet, Alert, Platform } from 'react-native';
+import { House } from 'lucide-react-native';
 import db from '../db/db';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
+import { commonStyles, colors } from '../styles/commonStyles';
 
 export default function ListaImoveisScreen({ navigation }) {
   const [imoveis, setImoveis] = useState([]);
 
   const carregarImoveis = async () => {
     try {
-        await db.init();
-        const lista = await db.getTodosImoveis();
-        const mapped = lista.map(i => ({
-          ...i,
-          tipo: i.tipo || i.meta?.tipo || i.title,
-          endereco: i.endereco || i.address || i.address || i.endereco || i.address,
-        }));
-        setImoveis(mapped);
+      await db.init();
+      const lista = await db.getTodosImoveis();
+      const mapped = lista.map(i => ({
+        ...i,
+        tipo: i.tipo || i.meta?.tipo || i.title,
+        endereco: i.endereco || i.address || i.endereco || '',
+      }));
+      setImoveis(mapped);
     } catch (error) {
       console.error('Erro ao carregar imóveis:', error);
     }
   };
 
   const excluirImovel = async (id) => {
+    const confirmar = async () => {
+      try {
+        await db.deleteImovel(id);
+        setImoveis(prev => prev.filter(i => i.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir imóvel:', error);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Deseja excluir este imóvel?')) {
+        await confirmar();
+      }
+      return;
+    }
+
     Alert.alert('Confirmação', 'Deseja excluir este imóvel?', [
       { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir', style: 'destructive', onPress: async () => {
-          try {
-            await db.deleteImovel(id);
-            setImoveis(prev => prev.filter(i => i.id !== id));
-          } catch (error) {
-            console.error('Erro ao excluir imóvel:', error);
-          }
-        }
-      }
+      { text: 'Excluir', style: 'destructive', onPress: confirmar },
     ]);
   };
 
@@ -42,60 +55,76 @@ export default function ListaImoveisScreen({ navigation }) {
   }, [navigation]);
 
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <Text style={styles.titulo}>{item.tipo}</Text>
-      <Text style={styles.text}>Endereço: {item.endereco}</Text>
-      <Text style={styles.text}>Andar: {item.andar}</Text>
-      <Text style={styles.text}>Completo: {item.completo}</Text>
-      <Text style={styles.text}>Torre: {item.torre}</Text>
-      <View style={styles.botoes}>
-        <Button title="Editar" onPress={() => navigation.navigate('CadastroImovel', { editar: item })} />
-        <Button title="Excluir" color="#d9534f" onPress={() => excluirImovel(item.id)} />
+    <View style={[commonStyles.card, styles.item]}>
+      <Text style={styles.title}>{item.tipo}</Text>
+      <Text style={commonStyles.text}>Endereço: {item.endereco}</Text>
+      <Text style={commonStyles.text}>Andar: {item.andar}</Text>
+      <Text style={commonStyles.text}>Completo: {item.completo}</Text>
+      <Text style={commonStyles.text}>Torre: {item.torre}</Text>
+      <View style={styles.rowButtons}>
+        <PrimaryButton title="Editar" onPress={() => navigation.navigate('CadastroImovel', { editar: item })} style={styles.smallButton} textStyle={styles.smallButtonText} />
+        <SecondaryButton title="Excluir" onPress={() => excluirImovel(item.id)} style={[styles.smallButton, styles.deleteButton]} textStyle={styles.deleteText} />
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>🏢 Lista de Imóveis</Text>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <PageContainer>
+        <PageHeader icon={House} title="Lista de Imóveis" />
         <FlatList
           data={imoveis}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
-          ListEmptyComponent={<Text style={styles.vazio}>Nenhum imóvel cadastrado.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>Nenhum imóvel cadastrado.</Text>}
           contentContainerStyle={styles.listContainer}
         />
-        <View style={styles.fixedBottom}>
-          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-        </View>
-      </View>
+        <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={styles.bottomButton} />
+      </PageContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
   item: {
-    backgroundColor: '#f1f1f1', padding: 15,
-    borderRadius: 8, marginBottom: 10
+    marginBottom: 16,
   },
-  titulo: {
-    fontSize: 18, fontWeight: 'bold'
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: colors.text,
   },
-  text: {
-    flexWrap: 'wrap',
-    numberOfLines: 2,
-    ellipsizeMode: 'tail'
+  rowButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 8,
+    marginTop: 14,
   },
-  botoes: {
-    flexDirection: 'row', justifyContent: 'space-between', marginTop: 10
+  smallButton: {
+    flex: 1,
+    minWidth: 120,
   },
-  vazio: {
-    textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999'
+  smallButtonText: {
+    color: '#fff',
   },
-  listContainer: { paddingBottom: 80 },
-  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
+  deleteButton: {
+    backgroundColor: colors.danger,
+  },
+  deleteText: {
+    color: '#fff',
+  },
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  bottomButton: {
+    marginTop: 18,
+  },
 });

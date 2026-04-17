@@ -1,97 +1,69 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Button, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { commonStyles, colors } from '../styles/commonStyles';
+import { SafeAreaView, KeyboardAvoidingView, TextInput, Alert, Platform } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
+import { commonStyles } from '../styles/commonStyles';
 
 export default function CadastroUsuarioScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
+  const showAlert = (title, message, buttons, options) => {
+    if (Platform.OS === 'web') {
+      if (!message) {
+        window.alert(title);
+        return;
+      }
+      window.alert(`${title}\n\n${message}`);
+      return;
+    }
+    Alert.alert(title, message, buttons, options);
+  };
+
   const handleCadastro = async () => {
     if (!email || !senha || !name) {
-      Alert.alert('Erro', 'Preencha todos os campos!');
+      showAlert('Erro', 'Preencha todos os campos!');
       return;
     }
 
     try {
-      // Cria usuário no Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.toLowerCase(),
-        senha
-      );
-
+      const userCredential = await createUserWithEmailAndPassword(auth, email.toLowerCase(), senha);
       const uid = userCredential.user.uid;
-
-      // Salva dados adicionais no Firestore
       await setDoc(doc(db, 'usuarios', uid), {
         nome: name,
         email: email.toLowerCase(),
         role: 'user',
-        criadoEm: new Date()
+        criadoEm: new Date(),
       });
 
-      Alert.alert('Sucesso', 'Usuário cadastrado com sucesso');
-
+      showAlert('Sucesso', 'Usuário cadastrado com sucesso');
       setName('');
       setEmail('');
       setSenha('');
-
       navigation.goBack();
-
     } catch (error) {
-      Alert.alert('Erro', error.message);
+      showAlert('Erro', error.message);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Cadastro de Usuário</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Nome"
-          value={name}
-          onChangeText={setName}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
-        </TouchableOpacity>
-        <View style={{ marginTop: 12 }}>
-          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <PageContainer scrollable>
+          <PageHeader title="Cadastro de Usuário" />
+          <TextInput style={commonStyles.input} placeholder="Nome" value={name} onChangeText={setName} />
+          <TextInput style={commonStyles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+          <TextInput style={commonStyles.input} placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
+          <PrimaryButton title="Cadastrar" onPress={handleCadastro} />
+          <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={{ marginTop: 16 }} />
+        </PageContainer>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', backgroundColor: colors.background, padding: 20 },
-  title: commonStyles.title,
-  input: commonStyles.input,
-  button: commonStyles.button,
-  buttonText: commonStyles.buttonText,
-});

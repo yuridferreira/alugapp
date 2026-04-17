@@ -1,10 +1,25 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, SafeAreaView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { AuthContext } from '../context/AuthContext';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
 import { commonStyles, colors } from '../styles/commonStyles';
+import {
+  UserPlus,
+  Users,
+  CircleUser,
+  ListChecks,
+  FileText,
+  House,
+  HousePlus,
+  CreditCard,
+  Clock3,
+  Cpu,
+  Settings2,
+  CircleQuestionMark,
+} from 'lucide-react-native';
 
 export default function HomeScreen({ navigation }) {
   const { user, role } = useContext(AuthContext);
@@ -13,23 +28,29 @@ export default function HomeScreen({ navigation }) {
 
   const handleLogout = async () => {
     await signOut(auth);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
   };
 
   const screens = [
-    { name: 'CadastroInquilino', label: 'Inquilino', icon: 'person-add-outline', adminOnly: false },
-    { name: 'ListaInquilinos', label: 'Inquilinos', icon: 'people-outline', adminOnly: false },
-    { name: 'CadastroUsuario', label: 'Novo Usuário', icon: 'person-circle-outline', adminOnly: true },
-    { name: 'ListaUsuarios', label: 'Usuários', icon: 'list-circle-outline', adminOnly: true },
-    { name: 'Contrato', label: 'Novo Contrato', icon: 'document-text-outline', adminOnly: false },
-    { name: 'ListaContratos', label: 'Contratos', icon: 'list-circle-outline', adminOnly: false },
-    { name: 'CadastroImovel', label: 'Imóvel', icon: 'home-outline', adminOnly: false },
-    { name: 'ListaImoveis', label: 'Imóveis', icon: 'home-sharp', adminOnly: false },
-    { name: 'Pagamentos', label: 'Pagamentos', icon: 'card-outline', adminOnly: false },
-    { name: 'Historico', label: 'Histórico', icon: 'time-outline', adminOnly: false },
-    { name: 'DashboardIA', label: 'IA', icon: 'robot-outline', adminOnly: false },
-    { name: 'Configuracoes', label: 'Configurações', icon: 'settings-outline', adminOnly: false },
-    { name: 'Ajuda', label: 'Ajuda', icon: 'help-circle-outline', adminOnly: false },
+    { name: 'CadastroInquilino', label: 'Inquilino', icon: UserPlus, adminOnly: false },
+    { name: 'ListaInquilinos', label: 'Inquilinos', icon: Users, adminOnly: false },
+    { name: 'CadastroUsuario', label: 'Novo Usuário', icon: CircleUser, adminOnly: true },
+    { name: 'ListaUsuarios', label: 'Usuários', icon: ListChecks, adminOnly: true },
+    { name: 'Contrato', label: 'Novo Contrato', icon: FileText, adminOnly: false },
+    { name: 'ListaContratos', label: 'Contratos', icon: ListChecks, adminOnly: false },
+    { name: 'CadastroImovel', label: 'Imóvel', icon: HousePlus, adminOnly: false },
+    { name: 'ListaImoveis', label: 'Imóveis', icon: House, adminOnly: false },
+    { name: 'Pagamentos', label: 'Pagamentos', icon: CreditCard, adminOnly: false },
+    { name: 'Historico', label: 'Histórico', icon: Clock3, adminOnly: false },
+    { name: 'DashboardIA', label: 'IA', icon: Cpu, adminOnly: false },
+    { name: 'Configuracoes', label: 'Configurações', icon: Settings2, adminOnly: false },
+    { name: 'Ajuda', label: 'Ajuda', icon: CircleQuestionMark, adminOnly: false },
   ];
+
+  const filteredScreens = screens.filter(screen => !screen.adminOnly || role === 'admin');
 
   const renderButtons = () => {
     const rows = [];
@@ -50,7 +71,7 @@ export default function HomeScreen({ navigation }) {
               }
             }}
           >
-            <Ionicons name={item.icon} size={28} color="#fff" />
+            <item.icon size={28} color="#fff" />
             <Text style={styles.buttonText}>{item.label}</Text>
           </TouchableOpacity>
         ))}
@@ -58,65 +79,53 @@ export default function HomeScreen({ navigation }) {
     ));
   };
 
-const filteredScreens = screens.filter(screen => !screen.adminOnly || role === 'admin');
-  
-return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Menu</Text>
-
-        <Text style={styles.userText}>
-          Logado como: {user?.email}
-        </Text>
-
+  return (
+    <SafeAreaView style={commonStyles.safeArea}>
+      <PageContainer scrollable>
+        <PageHeader title="Menu" subtitle={`Logado como: ${user?.email || 'Usuário'}`} />
         {renderButtons()}
-
         <View style={styles.logoutContainer}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutText}>Sair</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </PageContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: commonStyles.safeArea,
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    paddingTop: 10,
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-  },
-  title: commonStyles.title,
-  userText: commonStyles.subtitle,
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 15,
+    justifyContent: 'center',
+    marginBottom: 16,
+    flexWrap: 'wrap',
+    width: '100%',
   },
   button: {
-    ...commonStyles.button,
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: 20,
+    ...commonStyles.buttonPrimary,
+    width: 160,
+    margin: 8,
+    paddingVertical: 18,
+    alignItems: 'center',
   },
   buttonText: {
     ...commonStyles.buttonText,
+    marginTop: 8,
+    textAlign: 'center',
     fontSize: 14,
   },
   logoutContainer: {
-    marginTop: 20,
-    alignItems: 'center',
+    marginTop: 24,
+    width: '100%',
   },
   logoutButton: {
-    ...commonStyles.button,
-    backgroundColor: colors.danger,
-    width: '80%',
+    ...commonStyles.buttonSecondary,
+    borderColor: colors.danger,
+    backgroundColor: '#fff',
   },
-  logoutText: commonStyles.buttonText,
+  logoutText: {
+    ...commonStyles.buttonTextSecondary,
+    color: colors.danger,
+  },
 });

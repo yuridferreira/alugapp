@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, SafeAreaView } from 'react-native';
+import { SafeAreaView, View, Text, FlatList, StyleSheet } from 'react-native';
 import db from '../db/db';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import SecondaryButton from '../components/SecondaryButton';
 import { commonStyles, colors } from '../styles/commonStyles';
 
 export default function ListaInquilinosScreen({ navigation }) {
@@ -11,25 +14,23 @@ export default function ListaInquilinosScreen({ navigation }) {
       try {
         await db.init();
         const lista = await db.getTodosInquilinos();
-        // compatibilidade com chaves antigas
         const mapped = lista.map(i => ({
           nome: i.nome || i.name || '',
-          cpf: i.cpf || i.cpf || (i.id ? String(i.id) : ''),
+          cpf: i.cpf || String(i.id || ''),
           telefone: i.telefone || i.phone || '',
-          email: i.email || ''
+          email: i.email || '',
         }));
         setInquilinos(mapped);
       } catch (error) {
         console.error('Erro ao carregar inquilinos:', error);
       }
     };
-
     carregarInquilinos();
   }, []);
 
   const renderItem = ({ item }) => (
     <View style={commonStyles.card}>
-      <Text style={styles.nome}>{item.nome}</Text>
+      <Text style={styles.name}>{item.nome}</Text>
       <Text style={commonStyles.textSecondary}>CPF: {item.cpf}</Text>
       <Text style={commonStyles.textSecondary}>Telefone: {item.telefone}</Text>
       <Text style={commonStyles.textSecondary}>Email: {item.email}</Text>
@@ -38,41 +39,38 @@ export default function ListaInquilinosScreen({ navigation }) {
 
   return (
     <SafeAreaView style={commonStyles.safeArea}>
-      <View style={styles.container}>
-        <Text style={commonStyles.title}>Lista de Inquilinos</Text>
-
+      <PageContainer>
+        <PageHeader title="Lista de Inquilinos" />
         <FlatList
           data={inquilinos}
           keyExtractor={(item) => item.cpf || Math.random().toString()}
           renderItem={renderItem}
-          ListEmptyComponent={<Text style={styles.vazio}>Nenhum inquilino cadastrado.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>Nenhum inquilino cadastrado.</Text>}
           contentContainerStyle={styles.listContainer}
         />
-
-        <View style={styles.fixedBottom}>
-          <View style={commonStyles.button}>
-            <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} color="#fff" />
-          </View>
-        </View>
-      </View>
+        <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={styles.bottomButton} />
+      </PageContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: commonStyles.container,
-  nome: {
+  name: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 5,
+    marginBottom: 6,
   },
-  vazio: {
+  empty: {
     textAlign: 'center',
     marginTop: 40,
     fontSize: 16,
     color: colors.textSecondary,
   },
-  listContainer: { paddingBottom: 80 },
-  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  bottomButton: {
+    marginTop: 18,
+  },
 });

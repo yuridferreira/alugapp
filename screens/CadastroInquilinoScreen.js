@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, KeyboardAvoidingView, ScrollView, SafeAreaView } from 'react-native';
-import { commonStyles, colors } from '../styles/commonStyles';
+import { SafeAreaView, KeyboardAvoidingView, TextInput, Alert, Platform } from 'react-native';
+import { commonStyles } from '../styles/commonStyles';
 import db from '../db/db';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
 
 export default function CadastroInquilinoScreen({ navigation }) {
   const [nome, setNome] = useState('');
@@ -16,87 +20,52 @@ export default function CadastroInquilinoScreen({ navigation }) {
     init();
   }, []);
 
+  const showAlert = (title, message, buttons, options) => {
+    if (Platform.OS === 'web') {
+      if (!message) {
+        window.alert(title);
+        return;
+      }
+      window.alert(`${title}\n\n${message}`);
+      return;
+    }
+    Alert.alert(title, message, buttons, options);
+  };
+
   const handleSalvar = async () => {
     if (!nome || !cpf || !telefone || !email) {
-      Alert.alert('Preencha todos os campos!');
+      showAlert('Preencha todos os campos!');
       return;
     }
 
-    const inquilino = {
-      name: nome,
-      cpf,
-      phone: telefone,
-      email,
-    };
+    const inquilino = { name: nome, cpf, phone: telefone, email };
 
     try {
-      const id = await db.saveInquilino(inquilino);
-      console.log('Inquilino salvo com id', id);
-      Alert.alert('Inquilino cadastrado com sucesso!');
+      await db.saveInquilino(inquilino);
+      showAlert('Inquilino cadastrado com sucesso!');
       setNome('');
       setCpf('');
       setTelefone('');
       setEmail('');
     } catch (error) {
       console.error('Erro ao salvar inquilino:', error);
-      Alert.alert('Erro ao salvar o inquilino', error.message || error.toString());
+      showAlert('Erro ao salvar o inquilino', error.message || error.toString());
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Cadastro de Inquilino</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Nome"
-            value={nome}
-            onChangeText={setNome}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="CPF"
-            value={cpf}
-            onChangeText={setCpf}
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Telefone"
-            value={telefone}
-            onChangeText={setTelefone}
-            keyboardType="phone-pad"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-
-          <Button title="Salvar" onPress={handleSalvar} />
-          <View style={{ marginTop: 12 }}>
-            <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-          </View>
-        </ScrollView>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <PageContainer scrollable>
+          <PageHeader title="Cadastro de Inquilino" />
+          <TextInput style={commonStyles.input} placeholder="Nome" value={nome} onChangeText={setNome} />
+          <TextInput style={commonStyles.input} placeholder="CPF" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
+          <TextInput style={commonStyles.input} placeholder="Telefone" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+          <TextInput style={commonStyles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+          <PrimaryButton title="Salvar" onPress={handleSalvar} />
+          <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={{ marginTop: 16 }} />
+        </PageContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: commonStyles.safeArea,
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: commonStyles.title,
-  input: commonStyles.input,
-});

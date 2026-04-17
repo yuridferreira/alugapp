@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { commonStyles, colors } from '../styles/commonStyles';
+import { SafeAreaView, KeyboardAvoidingView, TextInput } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
+import { commonStyles } from '../styles/commonStyles';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -10,58 +14,41 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!email || !senha) {
-      Alert.alert('Erro', 'Preencha o email e a senha');
+      alert('Preencha o email e a senha');
       return;
     }
 
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      // Não precisa navegar manualmente
-      // AuthContext vai redirecionar automaticamente
     } catch (error) {
-      Alert.alert('Erro no login', error.message);
+      alert(`Erro no login: ${error.message}`);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Login</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('CadastroUsuario')}>
-          <Text style={{ marginTop: 15 }}>Criar conta</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <PageContainer scrollable>
+          <PageHeader title="Login" />
+          <TextInput
+            style={commonStyles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <TextInput
+            style={commonStyles.input}
+            placeholder="Senha"
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+          />
+          <PrimaryButton title="Entrar" onPress={handleLogin} />
+          <SecondaryButton title="Criar conta" onPress={() => navigation.navigate('CadastroUsuario')} style={{ marginTop: 16 }} />
+        </PageContainer>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 20 },
-  title: commonStyles.title,
-  input: commonStyles.input,
-  button: commonStyles.button,
-  buttonText: commonStyles.buttonText,
-});

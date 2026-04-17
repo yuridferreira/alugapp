@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, SafeAreaView } from 'react-native';
+import { SafeAreaView, View, Text, FlatList, StyleSheet } from 'react-native';
+import { Users } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import SecondaryButton from '../components/SecondaryButton';
+import { commonStyles, colors } from '../styles/commonStyles';
 
 export default function ListaUsuariosScreen({ navigation }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,69 +15,64 @@ export default function ListaUsuariosScreen({ navigation }) {
       try {
         const keys = await AsyncStorage.getAllKeys();
         const usuarioKeys = keys.filter(k => k.startsWith('usuario_'));
-
         const entries = await AsyncStorage.multiGet(usuarioKeys);
         const lista = entries.map(([key, value]) => JSON.parse(value));
-
         setUsuarios(lista);
       } catch (error) {
         console.error('Erro ao carregar usuários:', error);
       }
     };
-
     carregarUsuarios();
   }, []);
 
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
+    <View style={[commonStyles.card, styles.item]}>
       <Text style={styles.email}>Email: {item.email}</Text>
-      <Text style={styles.detalhe}>Senha: {item.senha}</Text>
+      <Text style={styles.detail}>Senha: {item.senha}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>👥 Lista de Usuários</Text>
-
+    <SafeAreaView style={commonStyles.safeArea}>
+      <PageContainer>
+        <PageHeader icon={Users} title="Lista de Usuários" />
         <FlatList
           data={usuarios}
           keyExtractor={(item) => item.email}
           renderItem={renderItem}
-          ListEmptyComponent={<Text style={styles.vazio}>Nenhum usuário cadastrado.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>Nenhum usuário cadastrado.</Text>}
           contentContainerStyle={styles.listContainer}
         />
-
-        <View style={styles.fixedBottom}>
-          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-        </View>
-      </View>
+        <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={styles.bottomButton} />
+      </PageContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: {
-    flex: 1, padding: 20,
-  },
-  title: {
-    fontSize: 24, marginBottom: 20, textAlign: 'center',
-  },
   item: {
-    backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 10,
+    marginBottom: 14,
   },
   email: {
-    fontSize: 18, fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 6,
   },
-  detalhe: {
+  detail: {
     fontSize: 14,
-    numberOfLines: 1,
-    ellipsizeMode: 'tail'
+    color: colors.textSecondary,
   },
-  vazio: {
-    textAlign: 'center', marginTop: 40, fontSize: 16, color: '#999',
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+    color: '#999',
   },
-  listContainer: { paddingBottom: 80 },
-  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  bottomButton: {
+    marginTop: 18,
+  },
 });

@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Button, SafeAreaView } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
+import { Archive } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../db/db';
+import PageContainer from '../components/PageContainer';
+import PageHeader from '../components/PageHeader';
+import SecondaryButton from '../components/SecondaryButton';
+import { commonStyles, colors } from '../styles/commonStyles';
 
 export default function HistoricoScreen({ navigation }) {
   const [historico, setHistorico] = useState([]);
@@ -10,49 +15,41 @@ export default function HistoricoScreen({ navigation }) {
     const carregarHistorico = async () => {
       try {
         await db.init();
-
-        // 1) pegar histórico do DB (nativo: tabela history; web: keys history_*)
         let entries = [];
         try {
           const h = await db.getHistory();
-          // db.getHistory retorna objetos com { id, entity, entity_id, action, date, data }
           entries = (h || []).map(row => {
-            let parsed = {};
-            try { parsed = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {}); } catch (e) { parsed = {}; }
+            const parsed = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {});
             return {
               id: row.id || `${row.entity}_${row.entity_id}_${row.date}`,
-              inquilino: parsed.inquilino || parsed.tenantName || parsed.tenant || parsed.nome || parsed.name || parsed.inquilino || null,
-              imovel: parsed.imovel || parsed.propertyAddress || parsed.property || parsed.endereco || parsed.address || null,
-              valor: parsed.valor || parsed.rent_value || parsed.valor || parsed.amount || null,
-              status: parsed.status || row.action || null,
-              dataInicio: parsed.dataInicio || parsed.start_date || parsed.inicio || null,
-              dataTermino: parsed.dataTermino || parsed.end_date || parsed.fim || null,
-              rawDate: row.date || parsed.date || null,
-              raw: parsed
+              inquilino: parsed.inquilino || parsed.tenantName || parsed.tenant || parsed.nome || parsed.name || '—',
+              imovel: parsed.imovel || parsed.propertyAddress || parsed.property || parsed.endereco || parsed.address || '—',
+              valor: parsed.valor || parsed.rent_value || parsed.amount || '—',
+              status: parsed.status || row.action || '—',
+              dataInicio: parsed.dataInicio || parsed.start_date || parsed.inicio || '—',
+              dataTermino: parsed.dataTermino || parsed.end_date || parsed.fim || '—',
+              rawDate: row.date || parsed.date || '',
+              raw: parsed,
             };
           });
         } catch (e) {
-          // ignore DB read errors for now, we'll still try legacy
           console.warn('Erro ao ler histórico do DB:', e);
         }
 
-        // 2) também carregar histórico legado (chave 'historico_alugueis') e mesclar para compatibilidade
         try {
           const dados = await AsyncStorage.getItem('historico_alugueis');
           const listaLegada = dados ? JSON.parse(dados) : [];
           const formatoLegado = (listaLegada || []).map(item => ({
             id: item.id || `legacy_${item.inquilino || ''}_${item.imovel || ''}_${item.dataTermino || item.dataInicio || ''}`,
-            inquilino: item.inquilino,
-            imovel: item.imovel,
-            valor: item.valor,
-            status: item.status,
-            dataInicio: item.dataInicio || item.inicio || null,
-            dataTermino: item.dataTermino || item.fim || null,
+            inquilino: item.inquilino || '—',
+            imovel: item.imovel || '—',
+            valor: item.valor || '—',
+            status: item.status || '—',
+            dataInicio: item.dataInicio || item.inicio || '—',
+            dataTermino: item.dataTermino || item.fim || '—',
             rawDate: null,
-            raw: item
+            raw: item,
           }));
-
-          // merge sem duplicação (por id)
           const seen = new Set(entries.map(e => String(e.id)));
           for (const it of formatoLegado) {
             if (!seen.has(String(it.id))) {
@@ -64,13 +61,7 @@ export default function HistoricoScreen({ navigation }) {
           console.warn('Erro ao ler histórico legado:', e);
         }
 
-        // ordenar por data se disponível (desc), senão manter ordem
-        entries.sort((a, b) => {
-          const da = a.rawDate || a.raw?.date || '';
-          const dbd = b.rawDate || b.raw?.date || '';
-          return (dbd || '').localeCompare(da || '');
-        });
-
+        entries.sort((a, b) => (b.rawDate || '').localeCompare(a.rawDate || ''));
         setHistorico(entries);
       } catch (err) {
         console.error('Erro ao carregar histórico:', err);
@@ -79,63 +70,53 @@ export default function HistoricoScreen({ navigation }) {
     carregarHistorico();
   }, []);
 
-  // Formata data no formato DD/MM/YYYY
-  const formatarData = (data) => {
-    if (!data) return '';
-    try {
-      if (data.includes('-')) {
-        const [ano, mes, dia] = data.split('-');
-        return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
-      }
-    } catch (e) { /* ignore */ }
-    return data;
-  };
-
-  const renderItem = ({ item }) => {
-    const dataInicioRaw = item.dataInicio || item.raw?.start_date || item.raw?.dataInicio;
-    const dataTerminoRaw = item.dataTermino || item.raw?.end_date || item.raw?.dataTermino;
-
-    return (
-      <View style={styles.item}>
-        <Text style={styles.label}>Contrato #{item.id}</Text>
-        <Text style={styles.text}>Inquilino: {item.inquilino || '—'}</Text>
-        <Text style={styles.text}>Imóvel: {item.imovel || '—'}</Text>
-        <Text style={styles.text}>Valor: R$ {item.valor ? Number(item.valor).toFixed(2) : '—'}</Text>
-        <Text style={styles.text}>Status: {item.status || '—'}</Text>
-        <Text style={styles.text}>Data de Início: {dataInicioRaw ? formatarData(String(dataInicioRaw)) : 'Não definida'}</Text>
-        <Text style={styles.text}>Data de Término: {dataTerminoRaw ? formatarData(String(dataTerminoRaw)) : 'Não definida'}</Text>
-      </View>
-    );
-  };
+  const renderItem = ({ item }) => (
+    <View style={[commonStyles.card, styles.item]}>
+      <Text style={styles.label}>Contrato #{item.id}</Text>
+      <Text style={commonStyles.text}>Inquilino: {item.inquilino}</Text>
+      <Text style={commonStyles.text}>Imóvel: {item.imovel}</Text>
+      <Text style={commonStyles.text}>Valor: R$ {item.valor}</Text>
+      <Text style={commonStyles.text}>Status: {item.status}</Text>
+      <Text style={commonStyles.text}>Data de Início: {item.dataInicio}</Text>
+      <Text style={commonStyles.text}>Data de Término: {item.dataTermino}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Text style={styles.title}>🗃 Histórico de Aluguéis</Text>
+    <SafeAreaView style={commonStyles.safeArea}>
+      <PageContainer>
+        <PageHeader icon={Archive} title="Histórico de Aluguéis" />
         <FlatList
           data={historico}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={<Text style={styles.empty}>Nenhum histórico disponível.</Text>}
         />
-        <View style={styles.fixedBottom}>
-          <Button title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} />
-        </View>
-      </View>
+        <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={styles.bottomButton} />
+      </PageContainer>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, marginBottom: 20, textAlign: 'center' },
-  item: { backgroundColor: '#f1f1f1', padding: 15, borderRadius: 8, marginBottom: 15 },
-  label: { fontWeight: 'bold', marginBottom: 5 },
-  text: {
-    numberOfLines: 1,
-    ellipsizeMode: 'tail'
+  item: {
+    marginBottom: 16,
   },
-  listContainer: { paddingBottom: 80 },
-  fixedBottom: { position: 'absolute', bottom: 16, left: 16, right: 16 },
+  label: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  empty: {
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+  bottomButton: {
+    marginTop: 18,
+  },
 });
