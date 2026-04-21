@@ -5,6 +5,22 @@ import { auth, db } from '../firebaseConfig';
 
 export const AuthContext = createContext({});
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getProfileWithRetry = async (userId, attempts = 5) => {
+  for (let index = 0; index < attempts; index += 1) {
+    const docRef = doc(db, 'usuarios', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+    if (index < attempts - 1) {
+      await wait(400);
+    }
+  }
+  return null;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -14,17 +30,9 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          const docRef = doc(db, 'usuarios', firebaseUser.uid);
-          const docSnap = await getDoc(docRef);
-
           setUser(firebaseUser);
-
-          if (docSnap.exists()) {
-            setRole(docSnap.data().role || 'user'); // fallback seguro
-          } else {
-            // Se não existir documento, assume user
-            setRole('user');
-          }
+          const profile = await getProfileWithRetry(firebaseUser.uid);
+          setRole(profile?.role || null);
         } else {
           setUser(null);
           setRole(null);

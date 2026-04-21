@@ -19,7 +19,71 @@ Aplicativo construído com [React Native](https://reactnative.dev/) e [Expo](htt
 
 ---
 
-## 🛠️ Tecnologias utilizadas
+## � Controle de Acesso (RBAC)
+
+O sistema implementa Role-Based Access Control (RBAC) com duas roles principais:
+
+### Roles Disponíveis
+
+- **admin**: Acesso total ao sistema
+  - Gerenciar imóveis, contratos, pagamentos e usuários
+  - Visualizar e editar todas as telas
+  - Acesso irrestrito
+
+- **usuario**: Acesso restrito
+  - Acesso às telas: Configurações, Ajuda, Meu Contrato, Meus Pagamentos e Histórico
+  - Pode visualizar apenas informações relacionadas ao seu próprio contrato
+  - Não pode acessar dados de outros usuários
+  - Telas somente-leitura (sem edição)
+
+### Implementação
+
+#### Frontend
+- **Estrutura de Roles**: Definida em `utils/permissions.js`
+- **Proteção de Rotas**: Implementada em `AppNavigator.js` com verificação de role
+- **Telas para Usuário**: 
+  - `MeuContratoScreen.js` - Visualização somente-leitura do contrato do usuário
+  - `MeusPagamentosScreen.js` - Histórico de pagamentos com status e resumo
+- **Contexto de Autenticação**: `AuthContext.js` gerencia role do usuário
+- **Funções de Banco**: `db.js` com novas funções:
+  - `getContratosByUserId(uid)` - Busca contratos específicos do usuário
+  - `getPagamentosByContratoId(contratoId)` - Busca pagamentos de um contrato
+
+#### Backend (Firebase)
+- **Regras de Segurança**: `firestore.rules` protege coleções no Firestore
+- **Validação de Acesso**: Verifica role e ownership dos dados
+- **Proteção de Dados**: Usuários só acessam seus próprios contratos/pagamentos
+
+### Como Usar
+
+1. **Definir Role no Cadastro**:
+   ```javascript
+   await db.saveUsuario({ email: 'user@example.com', role: 'usuario' });
+   ```
+
+2. **Verificar Permissões**:
+   ```javascript
+   import { hasPermission } from '../utils/permissions';
+   
+   if (hasPermission(userRole, 'canManageUsers')) {
+     // Executar ação
+   }
+   ```
+
+3. **Proteger Componentes**:
+   ```javascript
+   import { requirePermission } from '../utils/permissions';
+   
+   const ProtectedComponent = requirePermission('canManageUsers')(MyComponent);
+   ```
+
+4. **Regras Firestore**:
+   - Deploy as regras: `firebase deploy --only firestore:rules`
+   - As regras garantem que usuários não acessem dados de outros
+
+---
+
+## �🛠️ Tecnologias utilizadas
 
 - [Expo](https://expo.dev/)
 - React Native

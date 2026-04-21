@@ -34,28 +34,38 @@ export default function HomeScreen({ navigation }) {
     });
   };
 
-  const screens = [
-    { name: 'CadastroInquilino', label: 'Inquilino', icon: UserPlus, adminOnly: false },
-    { name: 'ListaInquilinos', label: 'Inquilinos', icon: Users, adminOnly: false },
-    { name: 'CadastroUsuario', label: 'Novo Usuário', icon: CircleUser, adminOnly: true },
-    { name: 'ListaUsuarios', label: 'Usuários', icon: ListChecks, adminOnly: true },
-    { name: 'Contrato', label: 'Novo Contrato', icon: FileText, adminOnly: false },
-    { name: 'ListaContratos', label: 'Contratos', icon: ListChecks, adminOnly: false },
-    { name: 'CadastroImovel', label: 'Imóvel', icon: HousePlus, adminOnly: false },
-    { name: 'ListaImoveis', label: 'Imóveis', icon: House, adminOnly: false },
-    { name: 'Pagamentos', label: 'Pagamentos', icon: CreditCard, adminOnly: false },
-    { name: 'Historico', label: 'Histórico', icon: Clock3, adminOnly: false },
-    { name: 'DashboardIA', label: 'IA', icon: Cpu, adminOnly: false },
-    { name: 'Configuracoes', label: 'Configurações', icon: Settings2, adminOnly: false },
-    { name: 'Ajuda', label: 'Ajuda', icon: CircleQuestionMark, adminOnly: false },
+  // Separar telas por role
+  const screensAdmin = [
+    { name: 'CadastroInquilino', label: 'Inquilino', icon: UserPlus },
+    { name: 'ListaInquilinos', label: 'Inquilinos', icon: Users },
+    { name: 'CadastroUsuario', label: 'Novo Usuário', icon: CircleUser },
+    { name: 'ListaUsuarios', label: 'Usuários', icon: ListChecks },
+    { name: 'Contrato', label: 'Novo Contrato', icon: FileText },
+    { name: 'ListaContratos', label: 'Contratos', icon: ListChecks },
+    { name: 'CadastroImovel', label: 'Imóvel', icon: HousePlus },
+    { name: 'ListaImoveis', label: 'Imóveis', icon: House },
+    { name: 'Pagamentos', label: 'Pagamentos', icon: CreditCard },
+    { name: 'Historico', label: 'Histórico', icon: Clock3 },
+    { name: 'DashboardIA', label: 'IA', icon: Cpu },
+    { name: 'Configuracoes', label: 'Configurações', icon: Settings2 },
+    { name: 'Ajuda', label: 'Ajuda', icon: CircleQuestionMark },
   ];
 
-  const filteredScreens = screens.filter(screen => !screen.adminOnly || role === 'admin');
+  const screensUsuario = [
+    { name: 'MeuContrato', label: 'Meu Contrato', icon: FileText },
+    { name: 'MeusPagamentos', label: 'Meus Pagamentos', icon: CreditCard },
+    { name: 'Historico', label: 'Histórico', icon: Clock3 },
+    { name: 'Configuracoes', label: 'Configurações', icon: Settings2 },
+    { name: 'Ajuda', label: 'Ajuda', icon: CircleQuestionMark },
+  ];
+
+  // Selecionar telas baseado no role
+  const screens = role === 'admin' ? screensAdmin : screensUsuario;
 
   const renderButtons = () => {
     const rows = [];
-    for (let i = 0; i < filteredScreens.length; i += numColumns) {
-      rows.push(filteredScreens.slice(i, i + numColumns));
+    for (let i = 0; i < screens.length; i += numColumns) {
+      rows.push(screens.slice(i, i + numColumns));
     }
     return rows.map((row, rowIndex) => (
       <View key={rowIndex} style={styles.row}>
@@ -63,13 +73,7 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity
             key={item.name}
             style={styles.button}
-            onPress={() => {
-              if (item.adminOnly && role !== 'admin') {
-                alert('Acesso restrito a administradores.');
-              } else {
-                navigation.navigate(item.name);
-              }
-            }}
+            onPress={() => navigation.navigate(item.name)}
           >
             <item.icon size={28} color="#fff" />
             <Text style={styles.buttonText}>{item.label}</Text>

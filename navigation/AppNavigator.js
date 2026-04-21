@@ -18,6 +18,8 @@ import ConfiguracoesScreen from "../screens/ConfiguracoesScreen";
 import AjudaScreen from "../screens/AjudaScreen";
 import DashboardIA from "../screens/DashboardIA";
 import CadastroUsuarioScreen from "../screens/CadastroUsuarioScreen";
+import MeuContratoScreen from "../screens/MeuContratoScreen";
+import MeusPagamentosScreen from "../screens/MeusPagamentosScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -59,11 +61,12 @@ export default function AppNavigator() {
           </>
         )}
 
-        {/* Inquilino */}
-        {user && role === "inquilino" && (
+        {/* Usuario - Acesso Restrito */}
+        {user && role === "usuario" && (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Pagamentos" component={PagamentosScreen} />
+            <Stack.Screen name="MeuContrato" component={MeuContratoScreen} />
+            <Stack.Screen name="MeusPagamentos" component={MeusPagamentosScreen} />
             <Stack.Screen name="Historico" component={HistoricoScreen} />
             <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
             <Stack.Screen name="Ajuda" component={AjudaScreen} />

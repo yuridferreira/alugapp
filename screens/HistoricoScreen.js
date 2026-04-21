@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Archive } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../db/db';
@@ -7,9 +7,13 @@ import PageContainer from '../components/PageContainer';
 import PageHeader from '../components/PageHeader';
 import SecondaryButton from '../components/SecondaryButton';
 import { commonStyles, colors } from '../styles/commonStyles';
+import { AuthContext } from '../context/AuthContext';
 
 export default function HistoricoScreen({ navigation }) {
+  const { role } = useContext(AuthContext);
   const [historico, setHistorico] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const carregarHistorico = async () => {
@@ -36,39 +40,58 @@ export default function HistoricoScreen({ navigation }) {
           console.warn('Erro ao ler histórico do DB:', e);
         }
 
-        try {
-          const dados = await AsyncStorage.getItem('historico_alugueis');
-          const listaLegada = dados ? JSON.parse(dados) : [];
-          const formatoLegado = (listaLegada || []).map(item => ({
-            id: item.id || `legacy_${item.inquilino || ''}_${item.imovel || ''}_${item.dataTermino || item.dataInicio || ''}`,
-            inquilino: item.inquilino || '—',
-            imovel: item.imovel || '—',
-            valor: item.valor || '—',
-            status: item.status || '—',
-            dataInicio: item.dataInicio || item.inicio || '—',
-            dataTermino: item.dataTermino || item.fim || '—',
-            rawDate: null,
-            raw: item,
-          }));
-          const seen = new Set(entries.map(e => String(e.id)));
-          for (const it of formatoLegado) {
-            if (!seen.has(String(it.id))) {
-              entries.push(it);
-              seen.add(String(it.id));
+        if (role === 'admin') {
+          try {
+            const dados = await AsyncStorage.getItem('historico_alugueis');
+            const listaLegada = dados ? JSON.parse(dados) : [];
+            const formatoLegado = (listaLegada || []).map(item => ({
+              id: item.id || `legacy_${item.inquilino || ''}_${item.imovel || ''}_${item.dataTermino || item.dataInicio || ''}`,
+              inquilino: item.inquilino || '—',
+              imovel: item.imovel || '—',
+              valor: item.valor || '—',
+              status: item.status || '—',
+              dataInicio: item.dataInicio || item.inicio || '—',
+              dataTermino: item.dataTermino || item.fim || '—',
+              rawDate: null,
+              raw: item,
+            }));
+            const seen = new Set(entries.map(e => String(e.id)));
+            for (const it of formatoLegado) {
+              if (!seen.has(String(it.id))) {
+                entries.push(it);
+                seen.add(String(it.id));
+              }
             }
+          } catch (e) {
+            console.warn('Erro ao ler histórico legado:', e);
           }
-        } catch (e) {
-          console.warn('Erro ao ler histórico legado:', e);
         }
 
         entries.sort((a, b) => (b.rawDate || '').localeCompare(a.rawDate || ''));
         setHistorico(entries);
+        setError(null);
       } catch (err) {
         console.error('Erro ao carregar histórico:', err);
+        setError('Erro ao carregar o histórico.');
+      } finally {
+        setLoading(false);
       }
     };
     carregarHistorico();
-  }, []);
+  }, [role]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={commonStyles.safeArea}>
+        <PageContainer>
+          <PageHeader icon={Archive} title="Histórico de Aluguéis" />
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        </PageContainer>
+      </SafeAreaView>
+    );
+  }
 
   const renderItem = ({ item }) => (
     <View style={[commonStyles.card, styles.item]}>
@@ -86,6 +109,9 @@ export default function HistoricoScreen({ navigation }) {
     <SafeAreaView style={commonStyles.safeArea}>
       <PageContainer>
         <PageHeader icon={Archive} title="Histórico de Aluguéis" />
+        {error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : null}
         <FlatList
           data={historico}
           keyExtractor={(item) => String(item.id)}
@@ -100,6 +126,11 @@ export default function HistoricoScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   item: {
     marginBottom: 16,
   },
@@ -115,6 +146,12 @@ const styles = StyleSheet.create({
     marginTop: 40,
     fontSize: 16,
     color: colors.textSecondary,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 16,
+    color: colors.danger || '#c0392b',
   },
   bottomButton: {
     marginTop: 18,
