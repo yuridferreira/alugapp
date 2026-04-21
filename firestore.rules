@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Função auxiliar para verificar se é admin
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Função auxiliar para verificar se é o próprio usuário
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Usuários: Apenas admin pode ler todos, usuários podem ler seu próprio
+    match /usuarios/{userId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == 'usuario' &&
+        request.resource.data.email is string
+      );
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == resource.data.role
+      ); // Usuários não podem mudar sua própria role
+      allow delete: if isAdmin();
+    }
+
+    // Inquilinos: Admin pode tudo, usuários não podem acessar
+    match /inquilinos/{inquilinoId} {
+      allow read, write, create, delete: if isAdmin();
+    }
+
+    // Imóveis: Admin pode tudo, usuários não podem acessar
+    match /imoveis/{imovelId} {
+      allow read, write, create, delete: if isAdmin();
+    }
+
+    // Contratos: Admin pode tudo, usuários podem ler apenas os seus próprios
+    match /contratos/{contratoId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow write, create, delete: if isAdmin();
+    }
+
+    // Pagamentos: Admin pode tudo, usuários podem ler apenas os relacionados ao seu contrato
+    match /pagamentos/{pagamentoId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow write, create, delete: if isAdmin();
+    }
+
+    // Histórico: Similar a pagamentos
+    match /historico/{historicoId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow write, create, delete: if isAdmin();
+    }
+  }
+}

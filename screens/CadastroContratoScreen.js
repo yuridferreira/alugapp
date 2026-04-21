@@ -9,7 +9,11 @@ import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import * as Notifications from 'expo-notifications';
 
-Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: true }) });
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: true })
+  });
+}
 
 export default function CadastroContratoScreen({ navigation }) {
   const [inquilinos, setInquilinos] = useState([]);
@@ -19,17 +23,32 @@ export default function CadastroContratoScreen({ navigation }) {
   const [inicio, setInicio] = useState('');
   const [fim, setFim] = useState('');
   const [valor, setValor] = useState('');
+  const [emailInquilino, setEmailInquilino] = useState(''); // ✨ Novo campo para vinculação
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
       await db.init();
       const inquilinosRaw = await db.getTodosInquilinos();
       const imoveisRaw = await db.getTodosImoveis();
-      setInquilinos(inquilinosRaw.map(i => ({ nome: i.nome || i.name || '', cpf: i.cpf || String(i.id || '') })));
+      setInquilinos(inquilinosRaw.map(i => ({
+        id: i.id || '',
+        nome: i.nome || i.name || '',
+        cpf: i.cpf || String(i.id || ''),
+        email: (i.email || '').toLowerCase()
+      })));
       setImoveis(imoveisRaw.map(i => ({ id: i.id, endereco: i.endereco || i.address || '', tipo: i.tipo || '' })));
     }
     carregarDados();
   }, []);
+
+  useEffect(() => {
+    if (!selectedInquilino) return;
+    const inquilinoSelecionado = inquilinos.find(i => String(i.cpf) === String(selectedInquilino) || String(i.id) === String(selectedInquilino));
+    if (inquilinoSelecionado?.email) {
+      setEmailInquilino(inquilinoSelecionado.email);
+    }
+  }, [selectedInquilino, inquilinos]);
 
   const formatarData = (value) => {
     const numeros = value.replace(/\D/g, '').slice(0, 8);
@@ -44,6 +63,7 @@ export default function CadastroContratoScreen({ navigation }) {
   };
 
   const agendarNotificacao = async (contrato) => {
+    if (Platform.OS === 'web') return;
     if (!contrato.fim) return;
     const [dia, mes, ano] = contrato.fim.split('/');
     const vencimento = new Date(`${ano}-${mes}-${dia}`);
@@ -80,36 +100,67 @@ export default function CadastroContratoScreen({ navigation }) {
   };
 
   const handleSalvar = async () => {
-    if (!selectedInquilino || !selectedImovel || !inicio || !fim || !valor) {
-      showAlert('Preencha todos os campos!');
+    if (!selectedInquilino || !selectedImovel || !inicio || !fim || !valor || !emailInquilino.trim()) {
+      showAlert('Preencha todos os campos, incluindo o email do inquilino.');
       return;
     }
+
+    const inquilinoSelecionado = inquilinos.find(
+      (inquilino) => String(inquilino.cpf) === String(selectedInquilino) || String(inquilino.id) === String(selectedInquilino)
+    );
+    const normalizedEmail = emailInquilino.trim().toLowerCase();
+
+    if (inquilinoSelecionado?.email && inquilinoSelecionado.email !== normalizedEmail) {
+      showAlert('O email informado deve ser o mesmo email cadastrado para o inquilino selecionado.');
+      return;
+    }
+
+    const valorNumerico = Number(String(valor).replace(',', '.'));
+    if (Number.isNaN(valorNumerico) || valorNumerico <= 0) {
+      showAlert('Informe um valor de aluguel válido.');
+      return;
+    }
+
     const dataInicioFormatada = converterDataParaBanco(inicio);
     const dataFimFormatada = converterDataParaBanco(fim);
     const contrato = {
       inquilino: selectedInquilino,
       imovel: selectedImovel,
-      valor,
+      valor: valorNumerico,
       dataInicio: dataInicioFormatada,
       dataTermino: dataFimFormatada,
       status: 'ativo',
       property_id: selectedImovel,
       tenant_id: selectedInquilino,
+      tenantEmail: normalizedEmail,
       start_date: dataInicioFormatada,
       end_date: dataFimFormatada,
-      rent_value: Number(valor) || 0,
+      rent_value: valorNumerico,
     };
 
     try {
-      const savedId = await db.saveContrato(contrato);
+      setLoading(true);
+      const resultado = await db.criarContratoComPagamentosAutomaticos(
+        contrato,
+        normalizedEmail
+      );
       let saved = null;
-      try { saved = await db.getContratoById(savedId); } catch (e) { saved = { ...contrato, id: savedId }; }
-      await agendarNotificacao(saved);
-      showAlert('Contrato cadastrado com sucesso!');
+      try { saved = await db.getContratoById(resultado.contrato.id); } catch (e) { saved = { ...contrato, id: resultado.contrato.id }; }
+      try {
+        await agendarNotificacao({ ...saved, fim });
+      } catch (notificationError) {
+        console.warn('Contrato salvo, mas não foi possível agendar a notificação:', notificationError);
+      }
+      showAlert(
+        'Contrato cadastrado com sucesso!',
+        `Contrato vinculado ao usuário ${resultado.contrato.email} e ${resultado.pagamentos.length} pagamento(s) foram gerados automaticamente.`
+      );
       navigation.navigate('ListaContratos');
     } catch (err) {
-      showAlert('Erro ao salvar contrato.');
+      showAlert('Erro ao salvar contrato.', err.message);
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,7 +182,15 @@ export default function CadastroContratoScreen({ navigation }) {
           <TextInput style={commonStyles.input} placeholder="Data de Início (DD/MM/AAAA)" value={inicio} onChangeText={t => setInicio(formatarData(t))} keyboardType="numeric" />
           <TextInput style={commonStyles.input} placeholder="Data de Fim (DD/MM/AAAA)" value={fim} onChangeText={t => setFim(formatarData(t))} keyboardType="numeric" />
           <TextInput style={commonStyles.input} placeholder="Valor (R$)" value={valor} onChangeText={setValor} keyboardType="numeric" />
-          <PrimaryButton title="Salvar Contrato" onPress={handleSalvar} />
+          <TextInput
+            style={commonStyles.input}
+            placeholder="Email do inquilino"
+            value={emailInquilino}
+            onChangeText={setEmailInquilino}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <PrimaryButton title={loading ? 'Salvando...' : 'Salvar Contrato'} onPress={handleSalvar} disabled={loading} />
           <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={{ marginTop: 16 }} />
         </PageContainer>
       </KeyboardAvoidingView>

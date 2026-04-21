@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { SafeAreaView, View, Text, Alert, FlatList, StyleSheet, Platform } from 'react-native';
 import { CreditCard } from 'lucide-react-native';
 import db from '../db/db';
@@ -6,15 +6,32 @@ import PageContainer from '../components/PageContainer';
 import PageHeader from '../components/PageHeader';
 import SecondaryButton from '../components/SecondaryButton';
 import { commonStyles, colors } from '../styles/commonStyles';
+import { AuthContext } from '../context/AuthContext';
+
+const formatStatusLabel = (status) => {
+  const raw = String(status || '').trim().toLowerCase();
+  if (raw === 'pago' || raw === 'paid') return 'Pago';
+  if (raw === 'atrasado' || raw === 'atrasada' || raw === 'overdue') return 'Atrasado';
+  if (raw === 'pendente' || raw === 'pending') return 'Pendente';
+  if (raw === 'finalizado') return 'Finalizado';
+  return status || 'Pendente';
+};
 
 export default function PagamentosScreen({ navigation }) {
+  const { user, role } = useContext(AuthContext);
   const [contratos, setContratos] = useState([]);
   const [statusPagamentos, setStatusPagamentos] = useState({});
 
   useEffect(() => {
     const carregarContratos = async () => {
       await db.init();
-      const listaRaw = await db.getTodosContratos();
+      let listaRaw;
+      if (role === 'admin') {
+        listaRaw = await db.getTodosContratos();
+      } else {
+        // Para usuario, buscar apenas contratos do usuário
+        listaRaw = await db.getContratosByUserId(user.uid);
+      }
       const [allTenants, allProperties] = await Promise.all([db.getTodosInquilinos(), db.getTodosImoveis()]);
       const tenantsByCpf = {};
       const tenantsById = {};
@@ -22,13 +39,14 @@ export default function PagamentosScreen({ navigation }) {
       const propertiesById = {};
       (allProperties || []).forEach(p => { if (p.id) propertiesById[String(p.id)] = p; });
 
-      const lista = listaRaw.map(c => {
+      const listaComStatus = await Promise.all(listaRaw.map(async (c) => {
+        const pagamentoAtual = await db.getPagamentoAtualByContratoId(c.id);
         const base = {
           id: c.id,
           inquilino: c.inquilino || c.tenant_id || null,
           imovel: c.imovel || c.property_id || null,
           valor: Number(c.valor || c.rent_value || 0),
-          status: c.status || 'pendente',
+          status: pagamentoAtual?.status || c.status || 'pendente',
         };
         const tenant = base.inquilino ? (tenantsByCpf[String(base.inquilino)] || tenantsById[String(base.inquilino)] || null) : null;
         const property = base.imovel ? propertiesById[String(base.imovel)] || null : null;
@@ -38,10 +56,10 @@ export default function PagamentosScreen({ navigation }) {
           tenantCpf: tenant?.cpf || null,
           propertyAddress: property?.endereco || property?.address || null,
         };
-      });
-      setContratos(lista);
+      }));
+      setContratos(listaComStatus);
       const estados = {};
-      lista.forEach(c => { estados[c.id] = c.status || 'pendente'; });
+      listaComStatus.forEach(c => { estados[c.id] = c.status || 'pendente'; });
       setStatusPagamentos(estados);
     };
     carregarContratos();
@@ -49,7 +67,10 @@ export default function PagamentosScreen({ navigation }) {
 
   const salvarHistorico = async (contrato) => {
     try {
-      await db.addHistory('contract', contrato.id, 'moved_to_history', contrato);
+      await db.addHistory('contract', contrato.id, 'moved_to_history', {
+        ...contrato,
+        userId: contrato.userId || null,
+      });
       return true;
     } catch (e) {
       console.warn('Erro ao salvar historico no DB:', e);
@@ -91,23 +112,12 @@ export default function PagamentosScreen({ navigation }) {
         }
       } else {
         const current = contratoDb || contrato;
-        const contratoParaSalvar = {
-          id: current.id,
-          inquilino: current.inquilino,
-          imovel: current.imovel,
-          valor: current.valor,
-          dataInicio: current.dataInicio,
-          dataTermino: current.dataTermino,
-          status: novoStatus,
-          property_id: current.imovel,
-          tenant_id: current.inquilino,
-          rent_value: Number(current.valor) || 0,
-          start_date: current.dataInicio,
-          end_date: current.dataTermino,
-        };
-        await db.saveContrato(contratoParaSalvar);
-        setContratos(prev => prev.map(c => c.id === id ? { ...c, status: novoStatus } : c));
-        setStatusPagamentos(prev => ({ ...prev, [id]: novoStatus }));
+        const pagamentoAtualizado = await db.atualizarStatusPagamentoAtual(id, novoStatus, {
+          nota: 'Status atualizado pelo administrador.'
+        });
+        const statusNormalizado = pagamentoAtualizado?.raw?.status || pagamentoAtualizado?.status || novoStatus;
+        setContratos(prev => prev.map(c => c.id === id ? { ...c, status: statusNormalizado } : c));
+        setStatusPagamentos(prev => ({ ...prev, [id]: statusNormalizado }));
       }
     } catch (err) {
       showAlert('Erro ao atualizar status');
@@ -121,7 +131,7 @@ export default function PagamentosScreen({ navigation }) {
       <Text style={commonStyles.text}>Inquilino: {item.inquilino}</Text>
       <Text style={commonStyles.text}>Imóvel: {item.imovel}</Text>
       <Text style={commonStyles.text}>Valor: R$ {typeof item.valor === 'number' && !isNaN(item.valor) ? item.valor.toFixed(2) : 'Valor inválido'}</Text>
-      <Text style={commonStyles.text}>Status: {statusPagamentos[item.id] || 'pendente'}</Text>
+      <Text style={commonStyles.text}>Status: {formatStatusLabel(statusPagamentos[item.id])}</Text>
       <View style={styles.rowButtons}>
         <SecondaryButton title="PAGO" onPress={() => atualizarStatus(item.id, 'Pago')} style={[styles.smallButton, { backgroundColor: '#28a745' }]} textStyle={{ color: '#fff' }} />
         <SecondaryButton title="PENDENTE" onPress={() => atualizarStatus(item.id, 'Pendente')} style={[styles.smallButton, { backgroundColor: '#f1c40f' }]} textStyle={{ color: '#111' }} />

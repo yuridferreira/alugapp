@@ -38,7 +38,7 @@ export default function CadastroUsuarioScreen({ navigation }) {
       await setDoc(doc(db, 'usuarios', uid), {
         nome: name,
         email: email.toLowerCase(),
-        role: 'user',
+        role: 'usuario', // Definido como 'usuario' para teste
         criadoEm: new Date(),
       });
 
