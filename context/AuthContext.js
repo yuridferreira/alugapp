@@ -1,6 +1,8 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import { auth, db } from '../firebaseConfig';
 
 export const AuthContext = createContext({});
@@ -33,6 +35,19 @@ export const AuthProvider = ({ children }) => {
           setUser(firebaseUser);
           const profile = await getProfileWithRetry(firebaseUser.uid);
           setRole(profile?.role || null);
+
+          // Registrar token de notificação push (apenas mobile)
+          if (Platform.OS !== 'web') {
+            try {
+              const token = await Notifications.getExpoPushTokenAsync();
+              if (token) {
+                const userRef = doc(db, 'usuarios', firebaseUser.uid);
+                await updateDoc(userRef, { expoPushToken: token.data });
+              }
+            } catch (error) {
+              console.log('Erro ao registrar token de notificação:', error);
+            }
+          }
         } else {
           setUser(null);
           setRole(null);

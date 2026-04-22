@@ -53,5 +53,10 @@ service cloud.firestore {
       allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
       allow write, create, delete: if isAdmin();
     }
+
+    // Payment Notification Logs: Apenas admin pode acessar (server-side)
+    match /paymentNotificationLogs/{logId} {
+      allow read, write, create, delete: if isAdmin();
+    }
   }
 }

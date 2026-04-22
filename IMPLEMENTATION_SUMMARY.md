@@ -1,16 +1,8 @@
-# 📦 Sumário de Implementação - RBAC e Telas de Usuário
+# 📦 Sumário de Implementação - Sistema de Gerenciamento de Aluguéis
 
-**Data**: 20 de abril de 2026  
-**Versão**: 1.0  
+**Data**: 21 de abril de 2026  
+**Versão**: 1.1  
 **Status**: ✅ Implementado e Testado
-
----
-
-## 🎯 Objetivo Alcançado
-
-Implementar um sistema completo de **Role-Based Access Control (RBAC)** com duas novas telas para usuários finais:
-- ✅ **Meu Contrato** - Visualização do contrato do usuário
-- ✅ **Meus Pagamentos** - Histórico de pagamentos do usuário
 
 ---
 
@@ -23,6 +15,15 @@ Implementar um sistema completo de **Role-Based Access Control (RBAC)** com duas
 | `screens/MeuContratoScreen.js` | Tela somente-leitura do contrato do usuário |
 | `screens/MeusPagamentosScreen.js` | Histórico de pagamentos com resumo por status |
 
+### Backend (Firebase Functions)
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `functions/package.json` | Configuração das dependências das funções |
+| `functions/index.js` | Função agendada para notificações de vencimento |
+| `firebase.json` | Configuração do Firebase (functions, firestore, hosting) |
+| `firestore.indexes.json` | Índices do Firestore |
+
 ### Documentação
 
 | Arquivo | Descrição |
@@ -30,13 +31,8 @@ Implementar um sistema completo de **Role-Based Access Control (RBAC)** com duas
 | `docs/RBAC_DOCUMENTATION.md` | Documentação técnica completa do RBAC |
 | `docs/EXAMPLES_USAGE.md` | Exemplos práticos de implementação |
 | `docs/TESTING_GUIDE.md` | Guia completo de testes |
+| `docs/NOTIFICACOES_VENCIMENTO.md` | Documentação da funcionalidade de notificações |
 | `IMPLEMENTATION_SUMMARY.md` | Este arquivo |
-
-### Backend
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `firestore.rules` | Regras de segurança do Firestore |
 
 ---
 
@@ -417,12 +413,46 @@ O sistema de RBAC foi implementado com sucesso!
 **Próximos Passos** (Opcional):
 - [ ] Implementar 2FA
 - [ ] Adicionar audit log
-- [ ] Notificações de pagamentos
+- [x] Notificações de pagamentos ✅ **Implementado**
 - [ ] Export de recibos (PDF)
 - [ ] API de pagamentos integrada
 
 ---
 
+## 🚨 Sistema de Notificações de Vencimento
+
+### ✅ Funcionalidades Implementadas
+
+**Backend**:
+- ✅ Firebase Cloud Function agendada diariamente
+- ✅ Verificação automática de pagamentos pendentes
+- ✅ Cálculo preciso de diferenças de datas
+- ✅ Prevenção de notificações duplicadas
+- ✅ Envio de push notifications via FCM
+
+**Frontend**:
+- ✅ Registro automático de tokens FCM no login
+- ✅ Integração com Expo Notifications
+
+**Banco de Dados**:
+- ✅ Nova coleção `paymentNotificationLogs`
+- ✅ Firestore rules atualizadas
+- ✅ Índices configurados
+
+### 📋 Regras de Negócio
+- ✅ 5 tipos de notificação (7d, 3d, 1d, vencimento, atraso)
+- ✅ Apenas para pagamentos "pendente"
+- ✅ Sem notificações para pagamentos "pago"
+- ✅ Fuso horário America/Sao_Paulo
+- ✅ Idempotência garantida
+
+### 📚 Documentação
+- `docs/NOTIFICACOES_VENCIMENTO.md` - Guia completo
+- Firebase Functions configuradas
+- Instruções de deploy incluídas
+
+---
+
 **Desenvolvido por**: GitHub Copilot  
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Status**: ✅ Pronto para Produção
