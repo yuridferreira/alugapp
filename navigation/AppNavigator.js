@@ -15,6 +15,7 @@ import ListaImoveisScreen from "../screens/ListaImoveisScreen";
 import PagamentosScreen from "../screens/PagamentosScreen";
 import HistoricoScreen from "../screens/HistoricoScreen";
 import ConfiguracoesScreen from "../screens/ConfiguracoesScreen";
+import ConfiguracaoDetalheScreen from "../screens/ConfiguracaoDetalheScreen";
 import AjudaScreen from "../screens/AjudaScreen";
 import DashboardIA from "../screens/DashboardIA";
 import CadastroUsuarioScreen from "../screens/CadastroUsuarioScreen";
@@ -57,6 +58,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Pagamentos" component={PagamentosScreen} />
             <Stack.Screen name="Historico" component={HistoricoScreen} />
             <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+            <Stack.Screen name="ConfiguracaoDetalhe" component={ConfiguracaoDetalheScreen} />
             <Stack.Screen name="Ajuda" component={AjudaScreen} />
           </>
         )}
@@ -69,6 +71,7 @@ export default function AppNavigator() {
             <Stack.Screen name="MeusPagamentos" component={MeusPagamentosScreen} />
             <Stack.Screen name="Historico" component={HistoricoScreen} />
             <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+            <Stack.Screen name="ConfiguracaoDetalhe" component={ConfiguracaoDetalheScreen} />
             <Stack.Screen name="Ajuda" component={AjudaScreen} />
           </>
         )}
