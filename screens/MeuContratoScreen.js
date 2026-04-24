@@ -1,11 +1,17 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import { FileText } from 'lucide-react-native';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
+import { FileText, Home, UserRound, BadgeInfo, CalendarDays, Coins, ShieldCheck } from 'lucide-react-native';
 import db from '../db/db';
 import PageContainer from '../components/PageContainer';
-import PageHeader from '../components/PageHeader';
 import SecondaryButton from '../components/SecondaryButton';
-import { commonStyles, colors } from '../styles/commonStyles';
 import { AuthContext } from '../context/AuthContext';
 import {
   formatCurrency,
@@ -15,19 +21,53 @@ import {
   getPaymentStatusTheme,
 } from '../utils/contractPresentation';
 
+const COLORS = {
+  primary: '#1A1A2E',
+  accent: '#4F8EF7',
+  accentGreen: '#22C55E',
+  accentYellow: '#F59E0B',
+  accentPurple: '#8B5CF6',
+  card: '#FFFFFF',
+  textPrimary: '#1A1A2E',
+  textSecondary: '#6B7280',
+  bg: '#F5F7FF',
+  softBlue: '#EAF1FF',
+  softGreen: '#EAFBF1',
+  softYellow: '#FFF7E6',
+  softPurple: '#F2ECFF',
+  border: '#E8EEFF',
+};
+
+function InfoRow({ icon: Icon, bgColor, iconColor, label, value }) {
+  return (
+    <View style={styles.infoRow}>
+      <View style={[styles.infoIconBox, { backgroundColor: bgColor }]}>
+        <Icon size={16} color={iconColor} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{value || '—'}</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function MeuContratoScreen({ navigation }) {
   const { user, role } = useContext(AuthContext);
   const [contrato, setContrato] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const paymentTheme = getPaymentStatusTheme(contrato?.statusFinanceiro);
+
+  const paymentTheme = useMemo(
+    () => getPaymentStatusTheme(contrato?.statusFinanceiro),
+    [contrato?.statusFinanceiro]
+  );
 
   useEffect(() => {
     const carregarContrato = async () => {
       try {
         await db.init();
 
-        // Validar que o usuário tem role 'usuario'
         if (role !== 'usuario') {
           setError('Você não tem permissão para acessar esta página.');
           setLoading(false);
@@ -46,7 +86,7 @@ export default function MeuContratoScreen({ navigation }) {
           resumo.pagamentoAtual?.data
         );
 
-        const contratoFormatado = {
+        setContrato({
           id: resumo.contrato.id,
           inquilino: resumo.inquilino.nome,
           inquilinoEmail: resumo.inquilino.email,
@@ -59,9 +99,7 @@ export default function MeuContratoScreen({ navigation }) {
           dataTermino: resumo.contrato.dataTermino || '—',
           statusFinanceiro,
           vencimentoAtual: resumo.pagamentoAtual?.data || '',
-        };
-
-        setContrato(contratoFormatado);
+        });
         setError(null);
       } catch (err) {
         console.error('Erro ao carregar contrato:', err);
@@ -76,11 +114,19 @@ export default function MeuContratoScreen({ navigation }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={commonStyles.safeArea}>
+      <SafeAreaView style={styles.safeArea}>
         <PageContainer>
-          <PageHeader icon={FileText} title="Meu Contrato" />
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerSub}>Área do inquilino</Text>
+              <Text style={styles.headerTitle}>Meu Contrato</Text>
+            </View>
+            <View style={styles.headerIconBox}>
+              <FileText size={22} color={COLORS.accent} />
+            </View>
+          </View>
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator size="large" color={COLORS.accent} />
           </View>
         </PageContainer>
       </SafeAreaView>
@@ -89,12 +135,22 @@ export default function MeuContratoScreen({ navigation }) {
 
   if (error) {
     return (
-      <SafeAreaView style={commonStyles.safeArea}>
+      <SafeAreaView style={styles.safeArea}>
         <PageContainer>
-          <PageHeader icon={FileText} title="Meu Contrato" />
-          <View style={styles.errorContainer}>
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerSub}>Área do inquilino</Text>
+              <Text style={styles.headerTitle}>Meu Contrato</Text>
+            </View>
+            <View style={styles.headerIconBox}>
+              <FileText size={22} color={COLORS.accent} />
+            </View>
+          </View>
+
+          <View style={styles.errorCard}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
+
           <SecondaryButton
             title="Voltar para o Menu"
             onPress={() => navigation.navigate('Home')}
@@ -106,12 +162,30 @@ export default function MeuContratoScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <PageContainer scrollable>
-        <PageHeader icon={FileText} title="Meu Contrato" />
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerSub}>Área do inquilino</Text>
+            <Text style={styles.headerTitle}>Meu Contrato</Text>
+          </View>
+          <View style={styles.headerIconBox}>
+            <FileText size={22} color={COLORS.accent} />
+          </View>
+        </View>
+
+        <View style={styles.banner}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bannerTitle}>Seus dados contratuais em um só lugar</Text>
+            <Text style={styles.bannerSub}>
+              Acompanhe informações do contrato, imóvel alugado, valor e situação financeira atual.
+            </Text>
+          </View>
+          <View style={styles.bannerDecor} />
+        </View>
 
         {contrato && (
-          <View style={[commonStyles.card, styles.contratoContainer]}>
+          <View style={styles.contractCard}>
             <View style={styles.statusRow}>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>
@@ -125,62 +199,93 @@ export default function MeuContratoScreen({ navigation }) {
               </View>
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Informações do Contrato</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>ID do Contrato:</Text>
-                <Text style={styles.value}>{contrato.id}</Text>
+            <View style={styles.highlightCard}>
+              <View style={styles.highlightIconBox}>
+                <Coins size={18} color={COLORS.accent} />
               </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Data de Início:</Text>
-                <Text style={styles.value}>{contrato.dataInicio}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Data de Término:</Text>
-                <Text style={styles.value}>{contrato.dataTermino}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Próximo Vencimento:</Text>
-                <Text style={styles.value}>{formatDate(contrato.vencimentoAtual)}</Text>
-              </View>
+              <Text style={styles.highlightLabel}>Valor do aluguel</Text>
+              <Text style={styles.highlightValue}>{formatCurrency(contrato.valor)}</Text>
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Imóvel Alugado</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Endereço:</Text>
-                <Text style={styles.value}>{contrato.imovel}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Tipo:</Text>
-                <Text style={styles.value}>{contrato.imovelTipo}</Text>
-              </View>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Informações do contrato</Text>
+              <InfoRow
+                icon={BadgeInfo}
+                bgColor={COLORS.softBlue}
+                iconColor={COLORS.accent}
+                label="ID do contrato"
+                value={String(contrato.id)}
+              />
+              <InfoRow
+                icon={CalendarDays}
+                bgColor={COLORS.softPurple}
+                iconColor={COLORS.accentPurple}
+                label="Data de início"
+                value={contrato.dataInicio}
+              />
+              <InfoRow
+                icon={CalendarDays}
+                bgColor={COLORS.softYellow}
+                iconColor={COLORS.accentYellow}
+                label="Data de término"
+                value={contrato.dataTermino}
+              />
+              <InfoRow
+                icon={CalendarDays}
+                bgColor={COLORS.softGreen}
+                iconColor={COLORS.accentGreen}
+                label="Próximo vencimento"
+                value={formatDate(contrato.vencimentoAtual)}
+              />
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Seus Dados</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Nome:</Text>
-                <Text style={styles.value}>{contrato.inquilino}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{contrato.inquilinoEmail}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.label}>CPF:</Text>
-                <Text style={styles.value}>{contrato.inquilinoCpf}</Text>
-              </View>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Imóvel alugado</Text>
+              <InfoRow
+                icon={Home}
+                bgColor={COLORS.softBlue}
+                iconColor={COLORS.accent}
+                label="Endereço"
+                value={contrato.imovel}
+              />
+              <InfoRow
+                icon={BadgeInfo}
+                bgColor={COLORS.softPurple}
+                iconColor={COLORS.accentPurple}
+                label="Tipo"
+                value={contrato.imovelTipo}
+              />
             </View>
 
-            <View style={[styles.section, styles.valorSection]}>
-              <Text style={styles.label}>Valor do Aluguel:</Text>
-              <Text style={styles.valorText}>{formatCurrency(contrato.valor)}</Text>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Seus dados</Text>
+              <InfoRow
+                icon={UserRound}
+                bgColor={COLORS.softGreen}
+                iconColor={COLORS.accentGreen}
+                label="Nome"
+                value={contrato.inquilino}
+              />
+              <InfoRow
+                icon={FileText}
+                bgColor={COLORS.softBlue}
+                iconColor={COLORS.accent}
+                label="Email"
+                value={contrato.inquilinoEmail}
+              />
+              <InfoRow
+                icon={BadgeInfo}
+                bgColor={COLORS.softPurple}
+                iconColor={COLORS.accentPurple}
+                label="CPF"
+                value={contrato.inquilinoCpf}
+              />
             </View>
 
-            <View style={styles.avisoContainer}>
-              <Text style={styles.avisoText}>
-                ℹ️ Esta é uma visualização de seus dados de contrato. Para alterações, entre em contato com o administrador.
+            <View style={styles.noteBox}>
+              <ShieldCheck size={16} color={COLORS.accent} />
+              <Text style={styles.noteText}>
+                Esta visualização é somente informativa. Para alterações contratuais, entre em contato com o administrador.
               </Text>
             </View>
           </View>
@@ -197,115 +302,214 @@ export default function MeuContratoScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  centerContainer: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: COLORS.bg,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 4,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  headerSub: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.5,
+  },
+  headerIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: COLORS.accent + '15',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    justifyContent: 'center',
   },
-  errorText: {
-    fontSize: 16,
-    color: colors.danger || '#e74c3c',
-    textAlign: 'center',
-    marginBottom: 20,
+  banner: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    overflow: 'hidden',
   },
-  contratoContainer: {
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    marginBottom: 20,
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  bannerSub: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.68)',
+    lineHeight: 19,
+  },
+  bannerDecor: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.accent + '20',
+    right: -24,
+    top: -20,
+  },
+  contractCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+    marginBottom: 16,
   },
   statusRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   statusBadge: {
-    backgroundColor: '#d4edda',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 20,
+    backgroundColor: COLORS.softGreen,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
   },
   statusText: {
-    color: '#155724',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: COLORS.accentGreen,
+    fontWeight: '800',
+    fontSize: 13,
   },
   paymentBadge: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
   },
   paymentBadgeText: {
-    fontWeight: 'bold',
-    fontSize: 14,
+    fontWeight: '800',
+    fontSize: 13,
   },
-  section: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
+  highlightCard: {
+    backgroundColor: COLORS.softBlue,
+    borderRadius: 18,
+    padding: 18,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  highlightIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  highlightLabel: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: COLORS.textSecondary,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  highlightValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary || '#333',
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
     marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    paddingBottom: 8,
   },
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 12,
+    alignItems: 'flex-start',
     marginBottom: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#f0f0f0',
   },
-  label: {
+  infoIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  infoLabel: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
     fontWeight: '600',
-    color: '#555',
+    lineHeight: 20,
+  },
+  noteBox: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.softYellow,
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 4,
+  },
+  noteText: {
     flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#856404',
   },
-  value: {
-    color: '#333',
-    flex: 1,
-    textAlign: 'right',
-    fontFamily: Platform.OS === 'web' ? 'monospace' : undefined,
-  },
-  valorSection: {
-    backgroundColor: '#f9f9f9',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 16,
-  },
-  valorText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.primary || '#007AFF',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  avisoContainer: {
-    backgroundColor: '#fff3cd',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginTop: 20,
-    marginHorizontal: 16,
+  errorCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#FFD8D8',
+    padding: 18,
     marginBottom: 16,
   },
-  avisoText: {
-    fontSize: 12,
-    color: '#856404',
-    lineHeight: 18,
+  errorText: {
+    fontSize: 15,
+    color: COLORS.accentRed,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '600',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 300,
   },
   bottomButton: {
     marginTop: 16,
+    marginBottom: 8,
   },
 });

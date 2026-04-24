@@ -1,23 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, KeyboardAvoidingView, View, Text, TextInput, StyleSheet, Dimensions } from 'react-native';
+import {
+  SafeAreaView,
+  KeyboardAvoidingView,
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
-import { ChartBar, Activity } from 'lucide-react-native';
+import { ChartBar, Activity, TrendingUp, Home, Users, FileText, Send } from 'lucide-react-native';
 import db from '../db/db';
 import PageContainer from '../components/PageContainer';
-import PageHeader from '../components/PageHeader';
-import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import { commonStyles } from '../styles/commonStyles';
 
-const chartColors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'];
+const COLORS = {
+  primary: '#1A1A2E',
+  accent: '#4F8EF7',
+  accentGreen: '#22C55E',
+  accentYellow: '#F59E0B',
+  accentRed: '#EF4444',
+  card: '#FFFFFF',
+  cardBorder: '#F0F4FF',
+  textPrimary: '#1A1A2E',
+  textSecondary: '#6B7280',
+  bg: '#F5F7FF',
+};
 
 const chartConfig = {
-  backgroundGradientFrom: '#ffffff',
-  backgroundGradientTo: '#ffffff',
+  backgroundGradientFrom: '#FFFFFF',
+  backgroundGradientTo: '#FFFFFF',
   decimalPlaces: 0,
-  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  color: (opacity = 1) => `rgba(79, 142, 247, ${opacity})`,
+  labelColor: () => '#6B7280',
+  propsForBackgroundLines: { stroke: '#F0F4FF', strokeWidth: 1 },
+  propsForLabels: { fontSize: 10 },
 };
+
+const pieChartConfig = {
+  ...chartConfig,
+  color: (opacity = 1) => `rgba(79, 142, 247, ${opacity})`,
+};
+
+function StatCard({ icon: Icon, label, value, color }) {
+  return (
+    <View style={[styles.statCard, { borderLeftColor: color }]}>
+      <View style={[styles.statIconBox, { backgroundColor: color + '18' }]}>
+        <Icon size={20} color={color} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.statLabel}>{label}</Text>
+        <Text style={[styles.statValue, { color }]}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
+function ChartCard({ title, children }) {
+  return (
+    <View style={styles.chartCard}>
+      <View style={styles.chartCardHeader}>
+        <View style={styles.chartCardDot} />
+        <Text style={styles.chartCardTitle}>{title}</Text>
+      </View>
+      {children}
+    </View>
+  );
+}
 
 export default function DashboardIA({ navigation }) {
   const [input, setInput] = useState('');
@@ -27,10 +78,9 @@ export default function DashboardIA({ navigation }) {
   const [inquilinos, setInquilinos] = useState([]);
   const [contratosPorMes, setContratosPorMes] = useState(null);
   const [receitaPorMes, setReceitaPorMes] = useState(null);
-  const [imoveisMaisAlugados, setImoveisMaisAlugados] = useState(null);
-  const [tiposImoveis, setTiposImoveis] = useState(null);
   const [statusPagamentos, setStatusPagamentos] = useState(null);
-  const screenWidth = Dimensions.get('window').width - 40;
+  const [totalReceita, setTotalReceita] = useState(0);
+  const [chartWidth, setChartWidth] = useState(0);
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -44,36 +94,24 @@ export default function DashboardIA({ navigation }) {
 
       const mesMap = {};
       const receitaMap = {};
-      const imovelMap = {};
-      const tiposMap = {};
       const statusMap = { pago: 0, pendente: 0, atrasado: 0 };
+      let receita = 0;
 
       contratosData.forEach(c => {
         const inicio = c.dataInicio || c.start_date || c.inicio || '';
         const valorRaw = c.valor || c.rent_value || '0';
-        let dia = '';
-        let mes = '';
-        let ano = '';
-        if (inicio.includes('/')) {
-          [dia, mes, ano] = inicio.split('/');
-        } else if (inicio.includes('-')) {
-          [ano, mes, dia] = inicio.split('-');
-        }
+        let mes = '', ano = '';
+        if (inicio.includes('/')) { [, mes, ano] = inicio.split('/'); }
+        else if (inicio.includes('-')) { [ano, mes] = inicio.split('-'); }
         const mesKey = mes && ano ? `${mes}/${ano}` : 'N/A';
         mesMap[mesKey] = (mesMap[mesKey] || 0) + 1;
-
         const valor = parseFloat(String(valorRaw).replace(',', '.')) || 0;
         receitaMap[mesKey] = (receitaMap[mesKey] || 0) + valor;
-
-        const imovelId = c.imovel || c.property_id || c.imovel;
-        imovelMap[imovelId] = (imovelMap[imovelId] || 0) + 1;
+        receita += valor;
         statusMap[c.status || 'pendente'] += 1;
       });
 
-      imoveisData.forEach(i => {
-        const tipo = i.tipo || 'Outro';
-        tiposMap[tipo] = (tiposMap[tipo] || 0) + 1;
-      });
+      setTotalReceita(receita);
 
       const ordenadoMeses = Object.keys(mesMap).sort((a, b) => {
         const [ma, aa] = a.split('/');
@@ -83,101 +121,165 @@ export default function DashboardIA({ navigation }) {
 
       setContratosPorMes({ labels: ordenadoMeses, datasets: [{ data: ordenadoMeses.map(m => mesMap[m]) }] });
       setReceitaPorMes({ labels: ordenadoMeses, datasets: [{ data: ordenadoMeses.map(m => receitaMap[m]) }] });
-      setImoveisMaisAlugados({ labels: Object.keys(imovelMap), datasets: [{ data: Object.values(imovelMap) }] });
-      setTiposImoveis(Object.entries(tiposMap).map(([k, v], i) => ({
-        name: k,
-        population: v,
-        color: chartColors[i % chartColors.length],
-        legendFontColor: '#333',
-        legendFontSize: 14,
-      })));
-      setStatusPagamentos([{
-        name: 'Pago', population: statusMap.pago, color: '#28a745', legendFontColor: '#333', legendFontSize: 14,
-      }, {
-        name: 'Pendente', population: statusMap.pendente, color: '#ffc107', legendFontColor: '#333', legendFontSize: 14,
-      }, {
-        name: 'Atrasado', population: statusMap.atrasado, color: '#dc3545', legendFontColor: '#333', legendFontSize: 14,
-      }]);
+      setStatusPagamentos([
+        { name: 'Pago', population: statusMap.pago, color: COLORS.accentGreen, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
+        { name: 'Pendente', population: statusMap.pendente, color: COLORS.accentYellow, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
+        { name: 'Atrasado', population: statusMap.atrasado, color: COLORS.accentRed, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
+      ]);
     };
     carregarDados();
   }, []);
 
   const interpretarPergunta = (pergunta) => {
     const p = pergunta.toLowerCase();
-    if (p.includes('contrato') && p.includes('quant')) {
-      return `Você tem ${contratos.length} contratos cadastrados.`;
+    if (p.includes('contrato') && p.includes('quant')) return `Você tem ${contratos.length} contratos cadastrados.`;
+    if (p.includes('receita') || p.includes('valor total')) {
+      return `A receita total prevista é R$ ${totalReceita.toFixed(2)}.`;
     }
-    if ((p.includes('receita') || p.includes('valor total')) && contratos.length > 0) {
-      const total = contratos.reduce((acc, c) => acc + parseFloat((c.valor || '0').replace(',', '.')), 0);
-      return `A receita total prevista pelos contratos é R$ ${total.toFixed(2)}.`;
-    }
-    if (p.includes('inquilino') && p.includes('quant')) {
-      return `Você tem ${inquilinos.length} inquilinos cadastrados.`;
-    }
-    if (p.includes('imóvel') && p.includes('quant')) {
-      return `Você tem ${imoveis.length} imóveis cadastrados.`;
-    }
+    if (p.includes('inquilino') && p.includes('quant')) return `Você tem ${inquilinos.length} inquilinos cadastrados.`;
+    if (p.includes('imóvel') && p.includes('quant')) return `Você tem ${imoveis.length} imóveis cadastrados.`;
     if (p.includes('tipo') && p.includes('imóvel')) {
       const tipos = imoveis.map(i => i.tipo || 'Indefinido');
       const contagem = tipos.reduce((acc, tipo) => ({ ...acc, [tipo]: (acc[tipo] || 0) + 1 }), {});
-      return 'Tipos de imóveis cadastrados: ' + Object.entries(contagem).map(([k, v]) => `${k} (${v})`).join(', ');
+      return 'Tipos: ' + Object.entries(contagem).map(([k, v]) => `${k} (${v})`).join(', ');
     }
-    return 'Desculpe, não entendi sua pergunta. Tente perguntar sobre contratos, imóveis ou receita.';
+    return 'Não entendi. Tente perguntar sobre contratos, imóveis, inquilinos ou receita.';
   };
 
   const handlePerguntar = () => {
-    const respostaIA = interpretarPergunta(input);
-    setResposta(respostaIA);
+    if (!input.trim()) return;
+    setResposta(interpretarPergunta(input));
     setInput('');
   };
 
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <PageContainer scrollable>
-          <PageHeader icon={ChartBar} title="Dashboard com IA" />
-          {contratosPorMes && (
-            <View style={styles.chartBox}>
-              <Text style={styles.chartTitle}>Contratos por Mês</Text>
-              <BarChart data={contratosPorMes} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
+          <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width - 32)}>
+
+
+          {/* Header */}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerSub}>Visão Geral</Text>
+              <Text style={styles.headerTitle}>Dashboard</Text>
             </View>
-          )}
-          {receitaPorMes && (
-            <View style={styles.chartBox}>
-              <Text style={styles.chartTitle}>Receita por Mês</Text>
-              <LineChart data={receitaPorMes} width={screenWidth} height={200} chartConfig={chartConfig} bezier style={styles.chart} />
+            <View style={styles.headerIconBox}>
+              <ChartBar size={22} color={COLORS.accent} />
             </View>
-          )}
-          {imoveisMaisAlugados && (
-            <View style={styles.chartBox}>
-              <Text style={styles.chartTitle}>Imóveis mais Alugados</Text>
-              <BarChart data={imoveisMaisAlugados} width={screenWidth} height={200} chartConfig={chartConfig} style={styles.chart} />
-            </View>
-          )}
-          {tiposImoveis && tiposImoveis.length > 0 && (
-            <View style={styles.chartBox}>
-              <Text style={styles.chartTitle}>Tipos de Imóveis</Text>
-              <PieChart data={tiposImoveis} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
-            </View>
-          )}
-          {statusPagamentos && (
-            <View style={styles.chartBox}>
-              <Text style={styles.chartTitle}>Status dos Pagamentos</Text>
-              <PieChart data={statusPagamentos} width={screenWidth} height={220} chartConfig={chartConfig} accessor="population" backgroundColor="transparent" paddingLeft="10" absolute />
-            </View>
-          )}
-          <View style={styles.assistantTitle}>
-            <Activity size={18} color="#4A90E2" style={styles.assistantIcon} />
-            <Text style={styles.sectionTitle}>Assistente de IA (offline)</Text>
           </View>
-          <TextInput style={commonStyles.input} placeholder="Digite sua pergunta..." value={input} onChangeText={setInput} />
-          <PrimaryButton title="Perguntar" onPress={handlePerguntar} />
-          {resposta !== '' && (
-            <View style={styles.responseBox}>
-              <Text style={styles.responseText}>{resposta}</Text>
-            </View>
+
+          {/* Stat Cards */}
+          <View style={styles.statsRow}>
+            <StatCard icon={FileText} label="Contratos" value={contratos.length} color={COLORS.accent} />
+            <StatCard icon={Home} label="Imóveis" value={imoveis.length} color="#8B5CF6" />
+          </View>
+          <View style={styles.statsRow}>
+            <StatCard icon={Users} label="Inquilinos" value={inquilinos.length} color="#F59E0B" />
+            <StatCard icon={TrendingUp} label="Receita" value={`R$${(totalReceita / 1000).toFixed(1)}k`} color={COLORS.accentGreen} />
+          </View>
+
+          {/* Gráficos */}
+          {contratosPorMes && (
+            <ChartCard title="Contratos por Mês">
+              <BarChart
+                data={contratosPorMes}
+                width={chartWidth}
+                height={180}
+                chartConfig={chartConfig}
+                style={styles.chart}
+                showValuesOnTopOfBars
+                withInnerLines={false}
+              />
+            </ChartCard>
           )}
-          <SecondaryButton title="Voltar para o Menu" onPress={() => navigation.navigate('Home')} style={styles.bottomButton} />
+
+          {receitaPorMes && (
+            <ChartCard title="Receita por Mês (R$)">
+              <LineChart
+                data={receitaPorMes}
+                width={chartWidth}
+                height={180}
+                chartConfig={{
+                  ...chartConfig,
+                  color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`,
+                  fillShadowGradient: '#22C55E',
+                  fillShadowGradientOpacity: 0.15,
+                }}
+                bezier
+                style={styles.chart}
+                withInnerLines={false}
+                withDots={true}
+              />
+            </ChartCard>
+          )}
+
+          {statusPagamentos && (
+            <ChartCard title="Status dos Pagamentos">
+              <PieChart
+                data={statusPagamentos}
+                width={chartWidth}
+                height={200}
+                chartConfig={pieChartConfig}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="16"
+                absolute
+              />
+              <View style={styles.legendRow}>
+                {statusPagamentos.map(item => (
+                  <View key={item.name} style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: item.color }]} />
+                    <Text style={styles.legendText}>{item.name}: {item.population}</Text>
+                  </View>
+                ))}
+              </View>
+            </ChartCard>
+          )}
+            </View> 
+
+          {/* Assistente IA */}
+          <View style={styles.iaCard}>
+            <View style={styles.iaHeader}>
+              <View style={styles.iaIconBox}>
+                <Activity size={18} color="#FFFFFF" />
+              </View>
+              <View>
+                <Text style={styles.iaTitle}>Assistente IA</Text>
+                <Text style={styles.iaSub}>Faça perguntas sobre seus dados</Text>
+              </View>
+            </View>
+
+            <View style={styles.iaInputRow}>
+              <TextInput
+                style={styles.iaInput}
+                placeholder="Ex: Quantos contratos tenho?"
+                placeholderTextColor={COLORS.textSecondary}
+                value={input}
+                onChangeText={setInput}
+                onSubmitEditing={handlePerguntar}
+                returnKeyType="send"
+              />
+              <TouchableOpacity style={styles.iaSendBtn} onPress={handlePerguntar}>
+                <Send size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            {resposta !== '' && (
+              <View style={styles.iaResponse}>
+                <View style={styles.iaResponseDot} />
+                <Text style={styles.iaResponseText}>{resposta}</Text>
+              </View>
+            )}
+        </View>
+
+          <SecondaryButton
+            title="Voltar para o Menu"
+            onPress={() => navigation.navigate('Home')}
+            style={styles.bottomButton}
+          />
+
         </PageContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -185,48 +287,210 @@ export default function DashboardIA({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  chartBox: {
-    marginBottom: 30,
-    width: '100%',
-    alignItems: 'center',
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
   },
-  chartTitle: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: '500',
-    color: commonStyles.text.color,
-  },
-  chart: {
-    borderRadius: 8,
-  },
-  assistantTitle: {
+  header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
+    marginBottom: 20,
+    marginTop: 4,
+  },
+  headerSub: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.5,
+  },
+  headerIconBox: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: COLORS.accent + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
     marginBottom: 12,
   },
-  assistantIcon: {
-    marginRight: 8,
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderLeftWidth: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  sectionTitle: {
+  statIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statLabel: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  statValue: {
     fontSize: 22,
-    marginBottom: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: commonStyles.text.color,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginTop: 1,
   },
-  responseBox: {
-    marginTop: 30,
-    padding: 15,
-    backgroundColor: '#f1f1f1',
+  chartCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  chartCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 14,
+  },
+  chartCardDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.accent,
+  },
+  chartCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  chart: {
     borderRadius: 12,
-    width: '100%',
+    alignSelf: 'center',
   },
-  responseText: {
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginTop: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  iaCard: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    marginTop: 4,
+  },
+  iaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  iaIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iaTitle: {
     fontSize: 16,
-    color: commonStyles.text.color,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  iaSub: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 1,
+  },
+  iaInputRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  iaInput: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  iaSendBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iaResponse: {
+    marginTop: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  iaResponseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.accentGreen,
+    marginTop: 4,
+  },
+  iaResponseText: {
+    flex: 1,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.85)',
+    lineHeight: 20,
   },
   bottomButton: {
-    marginTop: 18,
+    marginTop: 8,
+    marginBottom: 8,
   },
 });
