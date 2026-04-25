@@ -5,10 +5,10 @@
 // 1. CADASTRANDO UM USUÁRIO COM ROLE DE USUARIO
 // ==============================================================================
 
-import { db } from '../firebaseConfig';
+import { db } from '../firebaseConfig.js';
 import { doc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth } from '../firebaseConfig.js';
 
 // Exemplo: Cadastrar um novo usuário através do formulário
 export async function cadastrarUsuarioComRole(nome, email, senha, role = 'usuario') {
