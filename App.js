@@ -2,9 +2,9 @@ import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { AuthProvider } from './context/AuthContext';
-import AppNavigator from './navigation/AppNavigator';
-import { db } from './db/db';
+import { AuthProvider } from './src/context/AuthContext';
+import AppNavigator from './src/navigation/AppNavigator';
+import { db } from './src/services/localdb/db';
 
 export default function App() {
 
