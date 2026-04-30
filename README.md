@@ -170,4 +170,4 @@ npx expo start -c --web
 
 ---
 
-Feito com 💙 por [Jean Ferreira and Yuri Demetrio Ferreira]
+Feito com 💙 por [Jean Ferreira e Yuri Demetrio Ferreira]
