@@ -1,20 +1,22 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { SafeAreaView, View, Text, Switch, Alert, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Text, Switch, Alert, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updatePassword } from 'firebase/auth';
 import { Bell, Shield, Palette, Languages, UserRoundCog, ChevronRight, ArrowLeft } from 'lucide-react-native';
 import { AuthContext } from '../../context/AuthContext';
 import PageContainer from '../../components/layout/PageContainer';
+import ScreenHeader from '../../components/ui/ScreenHeader';
 import { commonStyles, colors } from '../../styles/commonStyles';
 import { loadAppSettings, saveAppSetting } from '../../utils/appSettings';
 
 const SECTION_META = {
   notifications: {
     title: 'Notificações',
-    description: 'Controle os alertas e avisos do aplicativo.',
+    description: 'Controle os lembretes de vencimento e avisos de pagamento.',
     icon: Bell,
-    eyebrow: 'Alertas',
+    eyebrow: 'Lembretes',
   },
   account: {
     title: 'Conta',
@@ -253,8 +255,8 @@ export default function ConfiguracaoDetalheScreen({ navigation, route }) {
         return (
           <>
             {renderSwitchRow({
-              label: 'Notificações push',
-              description: 'Receber avisos gerais e atualizações importantes.',
+              label: 'Lembretes de pagamento',
+              description: 'Receba avisos antecipados sobre vencimentos de aluguel.',
               value: settings.notificationsEnabled,
               onValueChange: (value) => updateSetting('notificationsEnabled', value),
               isLast: true,
@@ -272,7 +274,7 @@ export default function ConfiguracaoDetalheScreen({ navigation, route }) {
           <Text style={styles.backLinkText}>Voltar para configurações</Text>
         </TouchableOpacity>
 
-        <PageHeader icon={SectionIcon} title={section.title} subtitle={section.description} />
+        <ScreenHeader icon={SectionIcon} title={section.title} subtitle={section.description} />
 
         <View style={styles.heroCard}>
           <Text style={styles.heroEyebrow}>{section.eyebrow}</Text>

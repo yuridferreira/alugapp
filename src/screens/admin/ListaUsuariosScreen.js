@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
-import { SafeAreaView, View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, Mail, ShieldCheck, FolderOpen, UserRound } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PageContainer from '../../components/layout/PageContainer';

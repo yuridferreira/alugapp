@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bell, Shield, Palette, Languages, UserRoundCog, ChevronRight, Settings2 } from 'lucide-react-native';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
@@ -24,7 +25,7 @@ const SECTION_ITEMS = [
   {
     key: 'notifications',
     title: 'Notificações',
-    description: 'Alertas gerais e comunicados do aplicativo.',
+    description: 'Alertas de vencimento e lembretes de pagamento.',
     icon: Bell,
     color: COLORS.accentYellow,
   },

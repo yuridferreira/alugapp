@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Archive, Calendar, Home, User, TrendingUp, Clock } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../../services/localdb/db';
