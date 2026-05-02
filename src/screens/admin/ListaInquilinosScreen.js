@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
-import { SafeAreaView, View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Users, UserRound, BadgeInfo, Phone, Mail } from 'lucide-react-native';
 import { db } from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';

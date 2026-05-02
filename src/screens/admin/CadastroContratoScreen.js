@@ -24,6 +24,7 @@ import PageContainer from '../../components/layout/PageContainer';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import * as Notifications from 'expo-notifications';
+import { loadAppSettings } from '../../utils/appSettings';
 
 if (Platform.OS !== 'web') {
   Notifications.setNotificationHandler({
@@ -75,6 +76,7 @@ export default function CadastroContratoScreen({ navigation }) {
   const [fim, setFim] = useState('');
   const [valor, setValor] = useState('');
   const [emailInquilino, setEmailInquilino] = useState('');
+  const [settings, setSettings] = useState({ notificationsEnabled: true });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ export default function CadastroContratoScreen({ navigation }) {
       await db.init();
       const inquilinosRaw = await db.getTodosInquilinos();
       const imoveisRaw = await db.getTodosImoveis();
+      const loadedSettings = await loadAppSettings();
 
       setInquilinos(
         (inquilinosRaw || []).map((i) => ({
@@ -99,6 +102,10 @@ export default function CadastroContratoScreen({ navigation }) {
           tipo: i.tipo || '',
         }))
       );
+
+      setSettings({
+        notificationsEnabled: loadedSettings.notificationsEnabled,
+      });
     }
 
     carregarDados();
@@ -141,13 +148,18 @@ export default function CadastroContratoScreen({ navigation }) {
   };
 
   const agendarNotificacao = async (contrato) => {
+    if (!settings.notificationsEnabled) return;
     if (Platform.OS === 'web') return;
     if (!contrato.fim) return;
 
     const [dia, mes, ano] = contrato.fim.split('/');
     const vencimento = new Date(`${ano}-${mes}-${dia}`);
-    const dataNotificacao = new Date(vencimento);
-    dataNotificacao.setDate(dataNotificacao.getDate() - 3);
+    const notificationDate = new Date(vencimento);
+    notificationDate.setDate(notificationDate.getDate() - 3);
+
+    if (notificationDate <= new Date()) {
+      return;
+    }
 
     let imovel = null;
     try {
@@ -165,7 +177,7 @@ export default function CadastroContratoScreen({ navigation }) {
         body: `O aluguel do imóvel em ${endereco} vence em breve.`,
         sound: true,
       },
-      trigger: dataNotificacao,
+      trigger: notificationDate,
     });
   };
 

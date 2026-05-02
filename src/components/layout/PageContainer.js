@@ -1,10 +1,14 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, Platform } from 'react-native';
 import { theme } from '../../styles/theme';
 
 const styles = StyleSheet.create({
-  pageContainer: {
+  scrollViewContainer: {
     flex: 1,
+    width: '100%',
+  },
+  pageContainer: {
+    flexGrow: 1,
     width: '100%',
     maxWidth: 1200,
     alignSelf: 'center',
@@ -13,24 +17,22 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.xxxl,
     backgroundColor: theme.colors.bg,
   },
+  fullHeightView: {
+    flexGrow: 1,
+    ...(Platform.OS === 'web' && { minHeight: '100vh' }),
+  },
 });
 
 export default function PageContainer({ children, scrollable, style, contentContainerStyle, ...props }) {
-  if (scrollable) {
-    return (
-      <ScrollView
-        contentContainerStyle={[styles.pageContainer, contentContainerStyle]}
-        style={{ flex: 1, width: '100%' }}
-        {...props}
-      >
-        {children}
-      </ScrollView>
-    );
-  }
-
   return (
-    <View style={[styles.pageContainer, style]} {...props}>
-      {children}
-    </View>
+    <ScrollView
+      contentContainerStyle={[styles.pageContainer, contentContainerStyle]}
+      style={[styles.scrollViewContainer, style]}
+      {...props}
+    >
+      <View style={styles.fullHeightView}>
+        {children}
+      </View>
+    </ScrollView>
   );
 }
