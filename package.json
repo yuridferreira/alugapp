@@ -1,6 +1,6 @@
 {
   "name": "alugapp",
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "index.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",

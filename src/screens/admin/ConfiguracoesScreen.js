@@ -6,20 +6,7 @@ import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles } from '../../styles/commonStyles';
 import { loadAppSettings } from '../../utils/appSettings';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  accentRed: '#EF4444',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  border: '#F0F4FF',
-};
+import { theme } from '../../styles/theme';
 
 const SECTION_ITEMS = [
   {
@@ -27,35 +14,35 @@ const SECTION_ITEMS = [
     title: 'Notificações',
     description: 'Alertas de vencimento e lembretes de pagamento.',
     icon: Bell,
-    color: COLORS.accentYellow,
+    color: theme.colors.accentYellow,
   },
   {
     key: 'account',
     title: 'Conta',
     description: 'Senha e opções ligadas ao acesso da conta.',
     icon: UserRoundCog,
-    color: COLORS.accent,
+    color: theme.colors.accent,
   },
   {
     key: 'appearance',
     title: 'Aparência',
     description: 'Modo escuro e recursos de acessibilidade.',
     icon: Palette,
-    color: COLORS.accentPurple,
+    color: theme.colors.accentPurple,
   },
   {
     key: 'language',
     title: 'Idioma',
     description: 'Idioma do app e formato regional exibido.',
     icon: Languages,
-    color: COLORS.accentGreen,
+    color: theme.colors.accentGreen,
   },
   {
     key: 'privacy',
     title: 'Dados e Privacidade',
     description: 'Analytics, backup, cache e política de privacidade.',
     icon: Shield,
-    color: COLORS.accentRed,
+    color: theme.colors.accentRed,
   },
 ];
 
@@ -100,7 +87,7 @@ export default function ConfiguracoesScreen({ navigation }) {
             <Text style={styles.headerTitle}>Configurações</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <Settings2 size={22} color={COLORS.accent} />
+            <Settings2 size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -141,7 +128,7 @@ export default function ConfiguracoesScreen({ navigation }) {
                   </View>
                 </View>
 
-                <ChevronRight size={18} color={COLORS.textSecondary} />
+                <ChevronRight size={18} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             );
           })}
@@ -161,7 +148,7 @@ export default function ConfiguracoesScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   // Header
@@ -174,7 +161,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -183,21 +170,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   // Banner
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 22,
     marginBottom: 20,
@@ -211,7 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    color: COLORS.accent,
+    color: theme.colors.accent,
     marginBottom: 6,
   },
   bannerTitle: {
@@ -231,7 +218,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -16,
     top: -16,
   },
@@ -240,14 +227,14 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: COLORS.accentPurple + '25',
+    backgroundColor: theme.colors.accentPurple + '25',
     right: 50,
     bottom: -20,
   },
 
   // Lista
   sectionListCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -266,7 +253,7 @@ const styles = StyleSheet.create({
   },
   sectionDivider: {
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: theme.colors.border,
   },
   iconBadge: {
     width: 44,
@@ -281,12 +268,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 3,
   },
   sectionDescription: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     lineHeight: 17,
     marginBottom: 6,
   },
@@ -295,7 +282,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 20,
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
   },
   summaryText: {
     fontSize: 11,

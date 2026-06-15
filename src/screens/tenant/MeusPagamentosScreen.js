@@ -18,31 +18,13 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { AuthContext } from '../../context/AuthContext';
+import { theme } from '../../styles/theme';
 import {
   formatCurrency,
   formatDate,
   getPaymentStatusLabel,
   getPaymentStatusTheme,
 } from '../../utils/contractPresentation';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  accentRed: '#EF4444',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  softBlue: '#EAF1FF',
-  softGreen: '#EAFBF1',
-  softYellow: '#FFF7E6',
-  softPurple: '#F2ECFF',
-  softRed: '#FEECEC',
-  border: '#E8EEFF',
-};
 
 function InfoRow({ icon: Icon, bgColor, iconColor, label, value }) {
   return (
@@ -139,12 +121,12 @@ export default function MeusPagamentosScreen({ navigation }) {
               <Text style={styles.headerTitle}>Meus Pagamentos</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <CreditCard size={22} color={COLORS.accent} />
+              <CreditCard size={22} color={theme.colors.accent} />
             </View>
           </View>
 
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={COLORS.accent} />
+            <ActivityIndicator size="large" color={theme.colors.accent} />
           </View>
         </PageContainer>
       </SafeAreaView>
@@ -160,7 +142,7 @@ export default function MeusPagamentosScreen({ navigation }) {
             <Text style={styles.headerTitle}>Meus Pagamentos</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <CreditCard size={22} color={COLORS.accent} />
+            <CreditCard size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -191,7 +173,7 @@ export default function MeusPagamentosScreen({ navigation }) {
 
               <View style={styles.highlightCard}>
                 <View style={styles.highlightIconBox}>
-                  <Wallet size={18} color={COLORS.accent} />
+                  <Wallet size={18} color={theme.colors.accent} />
                 </View>
                 <Text style={styles.highlightLabel}>Valor atual</Text>
                 <Text style={styles.highlightValue}>
@@ -204,31 +186,31 @@ export default function MeusPagamentosScreen({ navigation }) {
 
                 <InfoRow
                   icon={Home}
-                  bgColor={COLORS.softBlue}
-                  iconColor={COLORS.accent}
+                  bgColor={theme.colors.softBlue}
+                  iconColor={theme.colors.accent}
                   label="Imóvel"
                   value={imovel}
                 />
 
                 <InfoRow
                   icon={CalendarDays}
-                  bgColor={COLORS.softYellow}
-                  iconColor={COLORS.accentYellow}
+                  bgColor={theme.colors.softYellow}
+                  iconColor={theme.colors.accentYellow}
                   label="Data do vencimento"
                   value={formatDate(pagamentoAtual?.vencimento)}
                 />
 
                 <InfoRow
                   icon={ReceiptText}
-                  bgColor={COLORS.softPurple}
-                  iconColor={COLORS.accentPurple}
+                  bgColor={theme.colors.softPurple}
+                  iconColor={theme.colors.accentPurple}
                   label="Status da cobrança"
                   value={pagamentoAtual?.status}
                 />
               </View>
 
               <View style={styles.noteBox}>
-                <ShieldCheck size={16} color={COLORS.accent} />
+                <ShieldCheck size={16} color={theme.colors.accent} />
                 <Text style={styles.noteText}>
                   Os dados exibidos aqui correspondem à sua cobrança atual. Em caso de dúvida,
                   entre em contato com a administração.
@@ -251,7 +233,7 @@ export default function MeusPagamentosScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   header: {
@@ -263,7 +245,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -272,20 +254,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -307,17 +289,17 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -24,
     top: -20,
   },
 
   summaryCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -342,7 +324,7 @@ const styles = StyleSheet.create({
   },
 
   highlightCard: {
-    backgroundColor: COLORS.softBlue,
+    backgroundColor: theme.colors.softBlue,
     borderRadius: 18,
     padding: 18,
     alignItems: 'center',
@@ -361,14 +343,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '800',
     marginBottom: 6,
   },
   highlightValue: {
     fontSize: 26,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     textAlign: 'center',
   },
 
@@ -377,13 +359,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
 
@@ -403,7 +385,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -411,7 +393,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
     lineHeight: 20,
   },
@@ -420,7 +402,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     alignItems: 'flex-start',
-    backgroundColor: COLORS.softYellow,
+    backgroundColor: theme.colors.softYellow,
     borderRadius: 16,
     padding: 14,
     marginTop: 4,
@@ -433,14 +415,14 @@ const styles = StyleSheet.create({
   },
 
   errorBox: {
-    backgroundColor: COLORS.softRed,
+    backgroundColor: theme.colors.softRed,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: '#FFD8D8',
   },
   errorText: {
-    color: COLORS.accentRed,
+    color: theme.colors.accentRed,
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,

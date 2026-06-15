@@ -17,24 +17,7 @@ import ScreenHeader from '../../components/ui/ScreenHeader';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles, colors } from '../../styles/commonStyles';
 import { AuthContext } from '../../context/AuthContext';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentRed: '#EF4444',
-  accentPurple: '#8B5CF6',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  softBlue: '#EAF1FF',
-  softGreen: '#EAFBF1',
-  softYellow: '#FFF7E6',
-  softRed: '#FEECEC',
-  border: '#E8EEFF',
-};
+import { theme } from '../../styles/theme';
 
 const formatStatusLabel = (status) => {
   const raw = String(status || '').trim().toLowerCase();
@@ -60,8 +43,8 @@ const getStatusMeta = (status) => {
   if (normalized === 'pago') {
     return {
       label: 'Pago',
-      color: COLORS.accentGreen,
-      bg: COLORS.softGreen,
+      color: theme.colors.accentGreen,
+      bg: theme.colors.softGreen,
       icon: BadgeCheck,
     };
   }
@@ -69,8 +52,8 @@ const getStatusMeta = (status) => {
   if (normalized === 'atrasado') {
     return {
       label: 'Atrasado',
-      color: COLORS.accentRed,
-      bg: COLORS.softRed,
+      color: theme.colors.accentRed,
+      bg: theme.colors.softRed,
       icon: AlertTriangle,
     };
   }
@@ -78,7 +61,7 @@ const getStatusMeta = (status) => {
   if (normalized === 'finalizado') {
     return {
       label: 'Finalizado',
-      color: COLORS.textSecondary,
+      color: theme.colors.textSecondary,
       bg: '#EEF2F7',
       icon: CheckCircle2,
     };
@@ -86,8 +69,8 @@ const getStatusMeta = (status) => {
 
   return {
     label: 'Pendente',
-    color: COLORS.accentYellow,
-    bg: COLORS.softYellow,
+    color: theme.colors.accentYellow,
+    bg: theme.colors.softYellow,
     icon: Clock3,
   };
 };
@@ -121,7 +104,7 @@ const PaymentItem = memo(function PaymentItem({ item, onChangeStatus }) {
 
       <View style={styles.cardHeader}>
         <View style={styles.cardIconBox}>
-          <CreditCard size={20} color={COLORS.accent} />
+          <CreditCard size={20} color={theme.colors.accent} />
         </View>
 
         <View style={{ flex: 1 }}>
@@ -135,7 +118,7 @@ const PaymentItem = memo(function PaymentItem({ item, onChangeStatus }) {
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <Home size={16} color={COLORS.accent} />
+            <Home size={16} color={theme.colors.accent} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.infoLabel}>Imóvel</Text>
@@ -145,7 +128,7 @@ const PaymentItem = memo(function PaymentItem({ item, onChangeStatus }) {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <User size={16} color={COLORS.accentPurple} />
+            <User size={16} color={theme.colors.accentPurple} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.infoLabel}>Valor do aluguel</Text>
@@ -155,7 +138,7 @@ const PaymentItem = memo(function PaymentItem({ item, onChangeStatus }) {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <CalendarDays size={16} color={COLORS.accentYellow} />
+            <CalendarDays size={16} color={theme.colors.accentYellow} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.infoLabel}>Status atual</Text>
@@ -397,7 +380,7 @@ export default function PagamentosScreen({ navigation }) {
             <Text style={styles.headerTitle}>Status de Pagamentos</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <CreditCard size={22} color={COLORS.accent} />
+            <CreditCard size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -476,7 +459,7 @@ export default function PagamentosScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -487,7 +470,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -496,19 +479,19 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -531,35 +514,35 @@ const styles = StyleSheet.create({
     width: 82,
     height: 82,
     borderRadius: 41,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     alignSelf: 'flex-start',
   },
   summaryCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
   },
   summaryLabel: {
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   summaryTitleSmall: {
     fontSize: 16,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   summaryText: {
     fontSize: 13,
     lineHeight: 19,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
   },
   searchInput: {
     backgroundColor: '#FFFFFF',
@@ -567,9 +550,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginBottom: 12,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
   filterBar: {
     flexDirection: 'row',
@@ -582,19 +565,19 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginRight: 8,
     marginBottom: 8,
   },
   filterButtonActive: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
+    borderColor: theme.colors.accent,
   },
   filterButtonPressed: {
     opacity: 0.85,
   },
   filterButtonText: {
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -605,12 +588,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -635,13 +618,13 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: COLORS.softBlue,
+    backgroundColor: theme.colors.softBlue,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardEyebrow: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
@@ -650,7 +633,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
   statusPill: {
     flexDirection: 'row',
@@ -683,7 +666,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -691,13 +674,13 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
     lineHeight: 20,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
     marginVertical: 16,
   },
   actionGrid: {
@@ -713,16 +696,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionPago: {
-    backgroundColor: COLORS.accentGreen,
+    backgroundColor: theme.colors.accentGreen,
   },
   actionPendente: {
-    backgroundColor: COLORS.accentYellow,
+    backgroundColor: theme.colors.accentYellow,
   },
   actionAtrasado: {
-    backgroundColor: COLORS.accentRed,
+    backgroundColor: theme.colors.accentRed,
   },
   actionFinalizar: {
-    backgroundColor: COLORS.textSecondary,
+    backgroundColor: theme.colors.textSecondary,
   },
   actionTextWhite: {
     color: '#FFFFFF',
@@ -731,7 +714,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   actionTextDark: {
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 0.6,
@@ -744,7 +727,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 36,
     fontSize: 15,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
   },
   bottomButton: {
     marginTop: 18,

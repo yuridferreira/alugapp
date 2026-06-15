@@ -8,27 +8,14 @@ import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles } from '../../styles/commonStyles';
 import { AuthContext } from '../../context/AuthContext';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  accentRed: '#EF4444',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  border: '#F0F4FF',
-};
+import { theme } from '../../styles/theme';
 
 const STATUS_COLORS = {
-  ativo: COLORS.accentGreen,
-  pago: COLORS.accentGreen,
-  pendente: COLORS.accentYellow,
-  atrasado: COLORS.accentRed,
-  encerrado: COLORS.textSecondary,
+  ativo: theme.colors.accentGreen,
+  pago: theme.colors.accentGreen,
+  pendente: theme.colors.accentYellow,
+  atrasado: theme.colors.accentRed,
+  encerrado: theme.colors.textSecondary,
 };
 
 function formatCurrency(valor) {
@@ -48,7 +35,7 @@ function formatDate(data) {
 
 function getStatusColor(status) {
   const s = (status || '').toLowerCase();
-  return STATUS_COLORS[s] || COLORS.textSecondary;
+  return STATUS_COLORS[s] || theme.colors.textSecondary;
 }
 
 export default function HistoricoScreen({ navigation }) {
@@ -132,11 +119,11 @@ export default function HistoricoScreen({ navigation }) {
               <Text style={styles.headerTitle}>Histórico</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <Archive size={22} color={COLORS.accent} />
+              <Archive size={22} color={theme.colors.accent} />
             </View>
           </View>
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={COLORS.accent} />
+            <ActivityIndicator size="large" color={theme.colors.accent} />
             <Text style={styles.loadingText}>Carregando registros...</Text>
           </View>
         </PageContainer>
@@ -162,7 +149,7 @@ export default function HistoricoScreen({ navigation }) {
         {/* Infos */}
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <User size={14} color={COLORS.accent} />
+            <User size={14} color={theme.colors.accent} />
           </View>
           <Text style={styles.infoLabel}>Inquilino</Text>
           <Text style={styles.infoValue} numberOfLines={1}>{item.inquilino}</Text>
@@ -170,7 +157,7 @@ export default function HistoricoScreen({ navigation }) {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <Home size={14} color={COLORS.accentPurple} />
+            <Home size={14} color={theme.colors.accentPurple} />
           </View>
           <Text style={styles.infoLabel}>Imóvel</Text>
           <Text style={styles.infoValue} numberOfLines={1}>{item.imovel}</Text>
@@ -178,10 +165,10 @@ export default function HistoricoScreen({ navigation }) {
 
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <TrendingUp size={14} color={COLORS.accentGreen} />
+            <TrendingUp size={14} color={theme.colors.accentGreen} />
           </View>
           <Text style={styles.infoLabel}>Valor</Text>
-          <Text style={[styles.infoValue, { color: COLORS.accentGreen, fontWeight: '700' }]}>{formatCurrency(item.valor)}</Text>
+          <Text style={[styles.infoValue, { color: theme.colors.accentGreen, fontWeight: '700' }]}>{formatCurrency(item.valor)}</Text>
         </View>
 
         {/* Datas */}
@@ -211,7 +198,7 @@ export default function HistoricoScreen({ navigation }) {
             <Text style={styles.headerTitle}>Histórico</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <Archive size={22} color={COLORS.accent} />
+            <Archive size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -245,7 +232,7 @@ export default function HistoricoScreen({ navigation }) {
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <Archive size={40} color={COLORS.border} />
+              <Archive size={40} color={theme.colors.border} />
               <Text style={styles.emptyText}>Nenhum histórico disponível.</Text>
             </View>
           }
@@ -266,7 +253,7 @@ export default function HistoricoScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   // Header
@@ -279,7 +266,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -288,21 +275,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   // Banner
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 22,
     marginBottom: 20,
@@ -341,7 +328,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -30,
     top: -30,
   },
@@ -356,22 +343,22 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     marginTop: 8,
   },
 
   // Error
   errorCard: {
-    backgroundColor: COLORS.accentRed + '12',
+    backgroundColor: theme.colors.accentRed + '12',
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
     borderLeftWidth: 3,
-    borderLeftColor: COLORS.accentRed,
+    borderLeftColor: theme.colors.accentRed,
   },
   errorText: {
     fontSize: 14,
-    color: COLORS.accentRed,
+    color: theme.colors.accentRed,
     fontWeight: '600',
   },
 
@@ -381,7 +368,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 18,
     padding: 16,
     shadowColor: '#000',
@@ -397,7 +384,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardIdBox: {
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -405,7 +392,7 @@ const styles = StyleSheet.create({
   cardIdText: {
     fontSize: 12,
     fontWeight: '700',
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     letterSpacing: 0.5,
   },
   statusPill: {
@@ -438,20 +425,20 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 7,
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   infoLabel: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     width: 64,
     fontWeight: '500',
   },
   infoValue: {
     flex: 1,
     fontSize: 13,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
     textAlign: 'right',
   },
@@ -462,7 +449,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: theme.colors.border,
   },
   dateBox: {
     flex: 1,
@@ -470,12 +457,12 @@ const styles = StyleSheet.create({
   },
   dateSep: {
     width: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
     marginHorizontal: 12,
   },
   dateLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -484,7 +471,7 @@ const styles = StyleSheet.create({
   dateValue: {
     fontSize: 13,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
 
   // Empty
@@ -495,7 +482,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
   },
 
   bottomButton: {

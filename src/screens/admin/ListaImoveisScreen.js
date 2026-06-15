@@ -22,25 +22,7 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { colors } from '../../styles/commonStyles';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentRed: '#EF4444',
-  accentPurple: '#8B5CF6',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  softBlue: '#EAF1FF',
-  softGreen: '#EAFBF1',
-  softYellow: '#FFF7E6',
-  softPurple: '#F2ECFF',
-  softRed: '#FEECEC',
-  border: '#E8EEFF',
-};
+import { theme } from '../../styles/theme';
 
 const normalizeText = (value) =>
   String(value || '')
@@ -64,7 +46,7 @@ const PropertyInfoRow = ({ icon: Icon, iconColor, bgColor, label, value }) => (
 const EmptyState = ({ onBack }) => (
   <View style={styles.emptyCard}>
     <View style={styles.emptyIconBox}>
-      <FolderOpen size={28} color={COLORS.accent} />
+      <FolderOpen size={28} color={theme.colors.accent} />
     </View>
     <Text style={styles.emptyTitle}>Nenhum imóvel cadastrado</Text>
     <Text style={styles.emptyText}>
@@ -81,7 +63,7 @@ const PropertyCard = memo(function PropertyCard({ item, onEdit, onDelete }) {
 
       <View style={styles.cardHeader}>
         <View style={styles.cardIconBox}>
-          <House size={20} color={COLORS.accent} />
+          <House size={20} color={theme.colors.accent} />
         </View>
 
         <View style={{ flex: 1 }}>
@@ -97,32 +79,32 @@ const PropertyCard = memo(function PropertyCard({ item, onEdit, onDelete }) {
       <View style={styles.cardBody}>
         <PropertyInfoRow
           icon={MapPin}
-          iconColor={COLORS.accent}
-          bgColor={COLORS.softBlue}
+          iconColor={theme.colors.accent}
+          bgColor={theme.colors.softBlue}
           label="Endereço"
           value={item.endereco}
         />
 
         <PropertyInfoRow
           icon={Building2}
-          iconColor={COLORS.accentPurple}
-          bgColor={COLORS.softPurple}
+          iconColor={theme.colors.accentPurple}
+          bgColor={theme.colors.softPurple}
           label="Torre"
           value={item.torre}
         />
 
         <PropertyInfoRow
           icon={Layers3}
-          iconColor={COLORS.accentYellow}
-          bgColor={COLORS.softYellow}
+          iconColor={theme.colors.accentYellow}
+          bgColor={theme.colors.softYellow}
           label="Andar"
           value={item.andar}
         />
 
         <PropertyInfoRow
           icon={House}
-          iconColor={COLORS.accentGreen}
-          bgColor={COLORS.softGreen}
+          iconColor={theme.colors.accentGreen}
+          bgColor={theme.colors.softGreen}
           label="Completo"
           value={item.completo}
         />
@@ -151,7 +133,7 @@ const PropertyCard = memo(function PropertyCard({ item, onEdit, onDelete }) {
             pressed && styles.pressed,
           ]}
         >
-          <Trash2 size={16} color={COLORS.accentRed} />
+          <Trash2 size={16} color={theme.colors.accentRed} />
           <Text style={styles.actionButtonTextDanger}>Excluir</Text>
         </Pressable>
       </View>
@@ -236,7 +218,7 @@ export default function ListaImoveisScreen({ navigation }) {
             <Text style={styles.headerTitle}>Lista de Imóveis</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <House size={22} color={COLORS.accent} />
+            <House size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -284,7 +266,7 @@ export default function ListaImoveisScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   header: {
@@ -296,7 +278,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -305,20 +287,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -340,37 +322,37 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -24,
     top: -20,
   },
 
   summaryCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
   },
   summaryLabel: {
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   summaryTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   summaryText: {
     fontSize: 13,
     lineHeight: 19,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
   },
 
   listContainer: {
@@ -379,12 +361,12 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -398,7 +380,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     height: 3,
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -410,13 +392,13 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: COLORS.softBlue,
+    backgroundColor: theme.colors.softBlue,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardEyebrow: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
@@ -425,16 +407,16 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
   tag: {
-    backgroundColor: COLORS.softGreen,
+    backgroundColor: theme.colors.softGreen,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 7,
   },
   tagText: {
-    color: COLORS.accentGreen,
+    color: theme.colors.accentGreen,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -457,7 +439,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -465,14 +447,14 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
     lineHeight: 20,
   },
 
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: theme.colors.border,
     marginVertical: 16,
   },
 
@@ -490,10 +472,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   editButton: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
   },
   deleteButton: {
-    backgroundColor: COLORS.softRed,
+    backgroundColor: theme.colors.softRed,
     borderWidth: 1,
     borderColor: '#FFD7D7',
   },
@@ -503,7 +485,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   actionButtonTextDanger: {
-    color: COLORS.accentRed,
+    color: theme.colors.accentRed,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -512,19 +494,19 @@ const styles = StyleSheet.create({
   },
 
   emptyCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginTop: 8,
   },
   emptyIconBox: {
     width: 60,
     height: 60,
     borderRadius: 18,
-    backgroundColor: COLORS.softBlue,
+    backgroundColor: theme.colors.softBlue,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -532,13 +514,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 8,
     textAlign: 'center',
   },
   emptyText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     lineHeight: 21,
     textAlign: 'center',
     marginBottom: 16,

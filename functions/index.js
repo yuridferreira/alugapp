@@ -41,7 +41,7 @@ exports.checkPaymentDueDates = functions.pubsub
   });
 
 async function processPaymentNotifications(payment, today) {
-  const dueDate = new Date(payment.dueDate);
+  const dueDate = new Date(payment.date);
   dueDate.setHours(0, 0, 0, 0);
 
   const diffTime = dueDate.getTime() - today.getTime();

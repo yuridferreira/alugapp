@@ -5,18 +5,7 @@ import { HelpCircle, MessageCircle, BookOpen, Phone, Mail, ChevronRight, Lightbu
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles } from '../../styles/commonStyles';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-};
+import { theme } from '../../styles/theme';
 
 function SectionCard({ icon: Icon, iconColor, title, children }) {
   return (
@@ -59,13 +48,13 @@ function ContactItem({ icon: Icon, label, value, onPress }) {
   return (
     <TouchableOpacity style={styles.contactItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.contactIconBox}>
-        <Icon size={18} color={COLORS.accent} />
+        <Icon size={18} color={theme.colors.accent} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.contactLabel}>{label}</Text>
         <Text style={styles.contactValue}>{value}</Text>
       </View>
-      <ChevronRight size={16} color={COLORS.textSecondary} />
+      <ChevronRight size={16} color={theme.colors.textSecondary} />
     </TouchableOpacity>
   );
 }
@@ -82,7 +71,7 @@ export default function AjudaScreen({ navigation }) {
             <Text style={styles.headerTitle}>Ajuda</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <HelpCircle size={22} color={COLORS.accent} />
+            <HelpCircle size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -96,7 +85,7 @@ export default function AjudaScreen({ navigation }) {
         </View>
 
         {/* FAQ */}
-        <SectionCard icon={MessageCircle} iconColor={COLORS.accent} title="Perguntas Frequentes">
+        <SectionCard icon={MessageCircle} iconColor={theme.colors.accent} title="Perguntas Frequentes">
           <FaqItem
             question="Como vejo meu contrato?"
             answer='Acesse "Meu Contrato" para consultar dados, prazos e valores.'
@@ -112,14 +101,14 @@ export default function AjudaScreen({ navigation }) {
         </SectionCard>
 
         {/* Como usar */}
-        <SectionCard icon={BookOpen} iconColor={COLORS.accentPurple} title="Como usar o app">
+        <SectionCard icon={BookOpen} iconColor={theme.colors.accentPurple} title="Como usar o app">
           <StepItem number="1" text='Verifique as informações do contrato em "Meu Contrato".' />
           <StepItem number="2" text="Confira os detalhes de cada pagamento e as datas de vencimento." />
           <StepItem number="3" text="Use este espaço para acompanhar notificações, atualizações e seu histórico de aluguel." />
         </SectionCard>
 
         {/* Contato */}
-        <SectionCard icon={Phone} iconColor={COLORS.accentGreen} title="Contato e Suporte">
+        <SectionCard icon={Phone} iconColor={theme.colors.accentGreen} title="Contato e Suporte">
           <Text style={styles.contactIntro}>Precisa de ajuda com o aluguel ou com o app? Estamos à disposição.</Text>
           <ContactItem
             icon={Mail}
@@ -160,7 +149,7 @@ export default function AjudaScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   // Header
@@ -173,7 +162,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -182,21 +171,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   // Banner
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -221,14 +210,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -20,
     top: -20,
   },
 
   // Cards
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
@@ -255,7 +244,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
 
   // FAQ
@@ -269,18 +258,18 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
     marginTop: 5,
   },
   faqQuestion: {
     fontSize: 14,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 3,
   },
   faqAnswer: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     lineHeight: 19,
   },
 
@@ -295,19 +284,19 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 8,
-    backgroundColor: COLORS.accentPurple + '18',
+    backgroundColor: theme.colors.accentPurple + '18',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepNumberText: {
     fontSize: 13,
     fontWeight: '800',
-    color: COLORS.accentPurple,
+    color: theme.colors.accentPurple,
   },
   stepText: {
     flex: 1,
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     paddingTop: 3,
   },
@@ -315,7 +304,7 @@ const styles = StyleSheet.create({
   // Contact
   contactIntro: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     lineHeight: 19,
     marginBottom: 14,
   },
@@ -331,13 +320,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: COLORS.accent + '12',
+    backgroundColor: theme.colors.accent + '12',
     alignItems: 'center',
     justifyContent: 'center',
   },
   contactLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -345,13 +334,13 @@ const styles = StyleSheet.create({
   contactValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginTop: 1,
   },
 
   // Tip
   tipCard: {
-    backgroundColor: COLORS.accentYellow,
+    backgroundColor: theme.colors.accentYellow,
     borderRadius: 20,
     padding: 18,
     flexDirection: 'row',
