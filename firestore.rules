@@ -51,7 +51,9 @@ service cloud.firestore {
     // Histórico: Similar a pagamentos
     match /historico/{historicoId} {
       allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
-      allow write, create, delete: if isAdmin();
+      allow create: if isAdmin() &&
+        request.resource.data.keys().hasAll(['entity', 'action', 'userId', 'date']);
+      allow update, delete: if isAdmin();
     }
 
     // Payment Notification Logs: Apenas admin pode acessar (server-side)

@@ -39,10 +39,13 @@ export const AuthProvider = ({ children }) => {
           // Registrar token de notificação push (apenas mobile)
           if (Platform.OS !== 'web') {
             try {
-              const token = await Notifications.getExpoPushTokenAsync();
-              if (token) {
-                const userRef = doc(db, 'usuarios', firebaseUser.uid);
-                await updateDoc(userRef, { expoPushToken: token.data });
+              const { status } = await Notifications.requestPermissionsAsync();
+              if (status === 'granted') {
+                const token = await Notifications.getExpoPushTokenAsync();
+                if (token) {
+                  const userRef = doc(db, 'usuarios', firebaseUser.uid);
+                  await updateDoc(userRef, { expoPushToken: token.data });
+                }
               }
             } catch (error) {
               console.log('Erro ao registrar token de notificação:', error);

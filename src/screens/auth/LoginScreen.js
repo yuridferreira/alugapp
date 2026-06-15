@@ -16,22 +16,7 @@ import { AuthContext } from '../../context/AuthContext';
 import PageContainer from '../../components/layout/PageContainer';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  softBlue: '#EAF1FF',
-  softGreen: '#EAFBF1',
-  softPurple: '#F2ECFF',
-  border: '#E8EEFF',
-};
+import { theme } from '../../styles/theme';
 
 function Field({ icon: Icon, iconColor, bgColor, label, children }) {
   return (
@@ -103,7 +88,7 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.headerTitle}>Login</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <ShieldCheck size={22} color={COLORS.accent} />
+              <ShieldCheck size={22} color={theme.colors.accent} />
             </View>
           </View>
 
@@ -127,8 +112,8 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.fieldsGroup}>
               <Field
                 icon={Mail}
-                iconColor={COLORS.accent}
-                bgColor={COLORS.softBlue}
+                iconColor={theme.colors.accent}
+                bgColor={theme.colors.softBlue}
                 label="Email"
               >
                 <TextInput
@@ -144,8 +129,8 @@ export default function LoginScreen({ navigation }) {
 
               <Field
                 icon={Lock}
-                iconColor={COLORS.accentPurple}
-                bgColor={COLORS.softPurple}
+                iconColor={theme.colors.accentPurple}
+                bgColor={theme.colors.softPurple}
                 label="Senha"
               >
                 <TextInput
@@ -176,7 +161,7 @@ export default function LoginScreen({ navigation }) {
           )}
 
           <View style={styles.footerNote}>
-            <LogIn size={14} color={COLORS.textSecondary} />
+            <LogIn size={14} color={theme.colors.textSecondary} />
             <Text style={styles.footerNoteText}>
               Acesse sua conta para continuar no aplicativo.
             </Text>
@@ -190,7 +175,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
 
   header: {
@@ -202,7 +187,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -211,20 +196,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -246,17 +231,17 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -24,
     top: -20,
   },
 
   formCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -269,19 +254,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   formTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   formSub: {
     fontSize: 13,
     lineHeight: 19,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 18,
   },
 
@@ -294,7 +279,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 8,
   },
   fieldWrapper: {
@@ -302,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     borderRadius: 16,
     paddingHorizontal: 12,
     minHeight: 54,
@@ -318,7 +303,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     paddingVertical: 12,
   },
 
@@ -339,6 +324,6 @@ const styles = StyleSheet.create({
   },
   footerNoteText: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
   },
 });

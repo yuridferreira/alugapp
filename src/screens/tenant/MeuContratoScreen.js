@@ -13,6 +13,7 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { AuthContext } from '../../context/AuthContext';
+import { theme } from '../../styles/theme';
 import {
   formatCurrency,
   formatDate,
@@ -20,23 +21,6 @@ import {
   getPaymentStatusLabel,
   getPaymentStatusTheme,
 } from '../../utils/contractPresentation';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentPurple: '#8B5CF6',
-  card: '#FFFFFF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-  softBlue: '#EAF1FF',
-  softGreen: '#EAFBF1',
-  softYellow: '#FFF7E6',
-  softPurple: '#F2ECFF',
-  border: '#E8EEFF',
-};
 
 function InfoRow({ icon: Icon, bgColor, iconColor, label, value }) {
   return (
@@ -122,11 +106,11 @@ export default function MeuContratoScreen({ navigation }) {
               <Text style={styles.headerTitle}>Meu Contrato</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <FileText size={22} color={COLORS.accent} />
+              <FileText size={22} color={theme.colors.accent} />
             </View>
           </View>
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={COLORS.accent} />
+            <ActivityIndicator size="large" color={theme.colors.accent} />
           </View>
         </PageContainer>
       </SafeAreaView>
@@ -143,7 +127,7 @@ export default function MeuContratoScreen({ navigation }) {
               <Text style={styles.headerTitle}>Meu Contrato</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <FileText size={22} color={COLORS.accent} />
+              <FileText size={22} color={theme.colors.accent} />
             </View>
           </View>
 
@@ -170,7 +154,7 @@ export default function MeuContratoScreen({ navigation }) {
             <Text style={styles.headerTitle}>Meu Contrato</Text>
           </View>
           <View style={styles.headerIconBox}>
-            <FileText size={22} color={COLORS.accent} />
+            <FileText size={22} color={theme.colors.accent} />
           </View>
         </View>
 
@@ -201,7 +185,7 @@ export default function MeuContratoScreen({ navigation }) {
 
             <View style={styles.highlightCard}>
               <View style={styles.highlightIconBox}>
-                <Coins size={18} color={COLORS.accent} />
+                <Coins size={18} color={theme.colors.accent} />
               </View>
               <Text style={styles.highlightLabel}>Valor do aluguel</Text>
               <Text style={styles.highlightValue}>{formatCurrency(contrato.valor)}</Text>
@@ -211,29 +195,29 @@ export default function MeuContratoScreen({ navigation }) {
               <Text style={styles.sectionTitle}>Informações do contrato</Text>
               <InfoRow
                 icon={BadgeInfo}
-                bgColor={COLORS.softBlue}
-                iconColor={COLORS.accent}
+                bgColor={theme.colors.softBlue}
+                iconColor={theme.colors.accent}
                 label="ID do contrato"
                 value={String(contrato.id)}
               />
               <InfoRow
                 icon={CalendarDays}
-                bgColor={COLORS.softPurple}
-                iconColor={COLORS.accentPurple}
+                bgColor={theme.colors.softPurple}
+                iconColor={theme.colors.accentPurple}
                 label="Data de início"
                 value={contrato.dataInicio}
               />
               <InfoRow
                 icon={CalendarDays}
-                bgColor={COLORS.softYellow}
-                iconColor={COLORS.accentYellow}
+                bgColor={theme.colors.softYellow}
+                iconColor={theme.colors.accentYellow}
                 label="Data de término"
                 value={contrato.dataTermino}
               />
               <InfoRow
                 icon={CalendarDays}
-                bgColor={COLORS.softGreen}
-                iconColor={COLORS.accentGreen}
+                bgColor={theme.colors.softGreen}
+                iconColor={theme.colors.accentGreen}
                 label="Próximo vencimento"
                 value={formatDate(contrato.vencimentoAtual)}
               />
@@ -243,15 +227,15 @@ export default function MeuContratoScreen({ navigation }) {
               <Text style={styles.sectionTitle}>Imóvel alugado</Text>
               <InfoRow
                 icon={Home}
-                bgColor={COLORS.softBlue}
-                iconColor={COLORS.accent}
+                bgColor={theme.colors.softBlue}
+                iconColor={theme.colors.accent}
                 label="Endereço"
                 value={contrato.imovel}
               />
               <InfoRow
                 icon={BadgeInfo}
-                bgColor={COLORS.softPurple}
-                iconColor={COLORS.accentPurple}
+                bgColor={theme.colors.softPurple}
+                iconColor={theme.colors.accentPurple}
                 label="Tipo"
                 value={contrato.imovelTipo}
               />
@@ -261,29 +245,29 @@ export default function MeuContratoScreen({ navigation }) {
               <Text style={styles.sectionTitle}>Seus dados</Text>
               <InfoRow
                 icon={UserRound}
-                bgColor={COLORS.softGreen}
-                iconColor={COLORS.accentGreen}
+                bgColor={theme.colors.softGreen}
+                iconColor={theme.colors.accentGreen}
                 label="Nome"
                 value={contrato.inquilino}
               />
               <InfoRow
                 icon={FileText}
-                bgColor={COLORS.softBlue}
-                iconColor={COLORS.accent}
+                bgColor={theme.colors.softBlue}
+                iconColor={theme.colors.accent}
                 label="Email"
                 value={contrato.inquilinoEmail}
               />
               <InfoRow
                 icon={BadgeInfo}
-                bgColor={COLORS.softPurple}
-                iconColor={COLORS.accentPurple}
+                bgColor={theme.colors.softPurple}
+                iconColor={theme.colors.accentPurple}
                 label="CPF"
                 value={contrato.inquilinoCpf}
               />
             </View>
 
             <View style={styles.noteBox}>
-              <ShieldCheck size={16} color={COLORS.accent} />
+              <ShieldCheck size={16} color={theme.colors.accent} />
               <Text style={styles.noteText}>
                 Esta visualização é somente informativa. Para alterações contratuais, entre em contato com o administrador.
               </Text>
@@ -304,7 +288,7 @@ export default function MeuContratoScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -315,7 +299,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -324,19 +308,19 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
   banner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -358,16 +342,16 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: COLORS.accent + '20',
+    backgroundColor: theme.colors.accent + '20',
     right: -24,
     top: -20,
   },
   contractCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -382,13 +366,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   statusBadge: {
-    backgroundColor: COLORS.softGreen,
+    backgroundColor: theme.colors.softGreen,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 999,
   },
   statusText: {
-    color: COLORS.accentGreen,
+    color: theme.colors.accentGreen,
     fontWeight: '800',
     fontSize: 13,
   },
@@ -402,7 +386,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   highlightCard: {
-    backgroundColor: COLORS.softBlue,
+    backgroundColor: theme.colors.softBlue,
     borderRadius: 18,
     padding: 18,
     alignItems: 'center',
@@ -421,27 +405,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '800',
     marginBottom: 6,
   },
   highlightValue: {
     fontSize: 24,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.colors.border,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
   infoRow: {
@@ -460,7 +444,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -468,7 +452,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
     lineHeight: 20,
   },
@@ -476,7 +460,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     alignItems: 'flex-start',
-    backgroundColor: COLORS.softYellow,
+    backgroundColor: theme.colors.softYellow,
     borderRadius: 16,
     padding: 14,
     marginTop: 4,
@@ -488,7 +472,7 @@ const styles = StyleSheet.create({
     color: '#856404',
   },
   errorCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: '#FFD8D8',
@@ -497,7 +481,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 15,
-    color: COLORS.accentRed,
+    color: theme.colors.accentRed,
     textAlign: 'center',
     lineHeight: 22,
     fontWeight: '600',

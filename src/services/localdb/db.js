@@ -141,7 +141,6 @@ export const db = {
       nome: usuario.nome || usuario.name || '',
       email: normalizeEmail(usuario.email),
       role: usuario.role || 'usuario',
-      password: usuario.password || usuario.senha || null,
       userId: id,
       criadoEm: usuario.criadoEm || usuario.createdAt || new Date().toISOString(),
       meta: usuario.meta || {}
@@ -163,14 +162,6 @@ export const db = {
     if (snap.empty) return null;
     const docSnap = snap.docs[0];
     return { id: docSnap.id, ...docSnap.data() };
-  },
-
-  async authUsuario(email, senha) {
-    if (!email || !senha) throw new Error('Email e senha são obrigatórios');
-    const user = await this.getUsuarioByEmail(email);
-    if (!user) throw new Error('Usuário não encontrado');
-    if (!user.password || user.password !== senha) throw new Error('Senha incorreta');
-    return user;
   },
 
   async deleteUsuario(email) {
@@ -719,8 +710,7 @@ export const db = {
           .reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
       };
     } catch (error) {
-      console.error('Erro ao buscar contrato com dados completos:', error);
-      return null;
+      throw error;
     }
   },
 
@@ -758,8 +748,7 @@ export const db = {
 
       return contratosCompletos;
     } catch (error) {
-      console.error('Erro ao buscar contratos com dados completos:', error);
-      return [];
+      throw error;
     }
   },
 

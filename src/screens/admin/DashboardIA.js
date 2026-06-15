@@ -15,19 +15,7 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles } from '../../styles/commonStyles';
-
-const COLORS = {
-  primary: '#1A1A2E',
-  accent: '#4F8EF7',
-  accentGreen: '#22C55E',
-  accentYellow: '#F59E0B',
-  accentRed: '#EF4444',
-  card: '#FFFFFF',
-  cardBorder: '#F0F4FF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  bg: '#F5F7FF',
-};
+import { theme } from '../../styles/theme';
 
 const chartConfig = {
   backgroundGradientFrom: '#FFFFFF',
@@ -122,9 +110,9 @@ export default function DashboardIA({ navigation }) {
       setContratosPorMes({ labels: ordenadoMeses, datasets: [{ data: ordenadoMeses.map(m => mesMap[m]) }] });
       setReceitaPorMes({ labels: ordenadoMeses, datasets: [{ data: ordenadoMeses.map(m => receitaMap[m]) }] });
       setStatusPagamentos([
-        { name: 'Pago', population: statusMap.pago, color: COLORS.accentGreen, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
-        { name: 'Pendente', population: statusMap.pendente, color: COLORS.accentYellow, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
-        { name: 'Atrasado', population: statusMap.atrasado, color: COLORS.accentRed, legendFontColor: COLORS.textSecondary, legendFontSize: 13 },
+        { name: 'Pago', population: statusMap.pago, color: theme.colors.accentGreen, legendFontColor: theme.colors.textSecondary, legendFontSize: 13 },
+        { name: 'Pendente', population: statusMap.pendente, color: theme.colors.accentYellow, legendFontColor: theme.colors.textSecondary, legendFontSize: 13 },
+        { name: 'Atrasado', population: statusMap.atrasado, color: theme.colors.accentRed, legendFontColor: theme.colors.textSecondary, legendFontSize: 13 },
       ]);
     };
     carregarDados();
@@ -158,7 +146,6 @@ export default function DashboardIA({ navigation }) {
         <PageContainer scrollable>
           <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width - 32)}>
 
-
           {/* Header */}
           <View style={styles.header}>
             <View>
@@ -166,18 +153,18 @@ export default function DashboardIA({ navigation }) {
               <Text style={styles.headerTitle}>Dashboard</Text>
             </View>
             <View style={styles.headerIconBox}>
-              <ChartBar size={22} color={COLORS.accent} />
+              <ChartBar size={22} color={theme.colors.accent} />
             </View>
           </View>
 
           {/* Stat Cards */}
           <View style={styles.statsRow}>
-            <StatCard icon={FileText} label="Contratos" value={contratos.length} color={COLORS.accent} />
+            <StatCard icon={FileText} label="Contratos" value={contratos.length} color={theme.colors.accent} />
             <StatCard icon={Home} label="Imóveis" value={imoveis.length} color="#8B5CF6" />
           </View>
           <View style={styles.statsRow}>
             <StatCard icon={Users} label="Inquilinos" value={inquilinos.length} color="#F59E0B" />
-            <StatCard icon={TrendingUp} label="Receita" value={`R$${(totalReceita / 1000).toFixed(1)}k`} color={COLORS.accentGreen} />
+            <StatCard icon={TrendingUp} label="Receita" value={`R$${(totalReceita / 1000).toFixed(1)}k`} color={theme.colors.accentGreen} />
           </View>
 
           {/* Gráficos */}
@@ -255,7 +242,7 @@ export default function DashboardIA({ navigation }) {
               <TextInput
                 style={styles.iaInput}
                 placeholder="Ex: Quantos contratos tenho?"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={theme.colors.textSecondary}
                 value={input}
                 onChangeText={setInput}
                 onSubmitEditing={handlePerguntar}
@@ -289,7 +276,7 @@ export default function DashboardIA({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: theme.colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -300,7 +287,7 @@ const styles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -309,14 +296,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
     letterSpacing: -0.5,
   },
   headerIconBox: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: COLORS.accent + '15',
+    backgroundColor: theme.colors.accent + '15',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -327,7 +314,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 14,
     flexDirection: 'row',
@@ -349,7 +336,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -361,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   chartCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.colors.card,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
@@ -381,12 +368,12 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
   },
   chartCardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: theme.colors.textPrimary,
   },
   chart: {
     borderRadius: 12,
@@ -411,11 +398,11 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   iaCard: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -431,7 +418,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -463,7 +450,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 12,
-    backgroundColor: COLORS.accent,
+    backgroundColor: theme.colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -480,7 +467,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: COLORS.accentGreen,
+    backgroundColor: theme.colors.accentGreen,
     marginTop: 4,
   },
   iaResponseText: {
