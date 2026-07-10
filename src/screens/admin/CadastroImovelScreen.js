@@ -3,7 +3,6 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   TextInput,
-  Alert,
   Platform,
   View,
   Text,
@@ -14,6 +13,7 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
+import { showSuccess, showError, showLoading, hideToast } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 function Field({ icon: Icon, iconColor, bgColor, label, placeholder, value, onChangeText }) {
@@ -58,18 +58,6 @@ export default function CadastroImovelScreen({ route, navigation }) {
     }
   }, [route.params]);
 
-  const showAlert = (title, message, buttons, options) => {
-    if (Platform.OS === 'web') {
-      if (!message) {
-        window.alert(title);
-        return;
-      }
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-    Alert.alert(title, message, buttons, options);
-  };
-
   const handleSalvar = async () => {
     const imovel = {
       ...(editando ? { id } : {}),
@@ -81,14 +69,17 @@ export default function CadastroImovelScreen({ route, navigation }) {
     };
 
     try {
+      showLoading(editando ? 'Salvando alterações...' : 'Cadastrando imóvel...');
       await db.saveImovel(imovel);
-      showAlert(
+      hideToast();
+      showSuccess(
         editando ? 'Imóvel atualizado!' : 'Imóvel cadastrado com sucesso!'
       );
       navigation.navigate('ListaImoveis');
     } catch (error) {
       console.error('Erro ao salvar imóvel:', error);
-      showAlert('Erro', 'Não foi possível salvar o imóvel.');
+      hideToast();
+      showError('Erro', 'Não foi possível salvar o imóvel.');
     }
   };
 

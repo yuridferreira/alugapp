@@ -22,6 +22,7 @@ import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { colors } from '../../styles/commonStyles';
+import { showSuccess, showError } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 const normalizeText = (value) =>
@@ -175,8 +176,10 @@ export default function ListaImoveisScreen({ navigation }) {
       try {
         await db.deleteImovel(id);
         setImoveis((prev) => prev.filter((i) => i.id !== id));
+        showSuccess('Imóvel excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir imóvel:', error);
+        showError('Erro ao excluir o imóvel', error.message || error.toString());
       }
     };
 

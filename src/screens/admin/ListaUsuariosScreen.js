@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useCallback, memo } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useState, useCallback, memo } from 'react';
+import { View, Text, FlatList, StyleSheet, Alert, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Users, Mail, ShieldCheck, FolderOpen, UserRound } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Users, Mail, ShieldCheck, FolderOpen, UserRound, Trash2 } from 'lucide-react-native';
+import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
+import { AuthContext } from '../../context/AuthContext';
+import { showSuccess, showError } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 const UserInfoRow = ({ icon: Icon, iconColor, bgColor, label, value }) => (
@@ -32,7 +34,9 @@ const EmptyState = ({ onBack }) => (
   </View>
 );
 
-const UserCard = memo(function UserCard({ item }) {
+const UserCard = memo(function UserCard({ item, isSelf, onDelete }) {
+  const isAdmin = item.role === 'admin';
+
   return (
     <View style={styles.card}>
       <View style={styles.cardTopAccent} />
@@ -44,11 +48,11 @@ const UserCard = memo(function UserCard({ item }) {
 
         <View style={{ flex: 1 }}>
           <Text style={styles.cardEyebrow}>USUÁRIO</Text>
-          <Text style={styles.cardTitle}>{item.email}</Text>
+          <Text style={styles.cardTitle}>{item.nome || item.email}</Text>
         </View>
 
         <View style={styles.statusBadge}>
-          <Text style={styles.statusBadgeText}>Ativo</Text>
+          <Text style={styles.statusBadgeText}>{isAdmin ? 'Admin' : 'Usuário'}</Text>
         </View>
       </View>
 
@@ -65,37 +69,95 @@ const UserCard = memo(function UserCard({ item }) {
           icon={ShieldCheck}
           iconColor={theme.colors.accentGreen}
           bgColor={theme.colors.softGreen}
-          label="Senha"
-          value="••••••••"
+          label="Perfil"
+          value={isAdmin ? 'Administrador' : 'Usuário (inquilino)'}
         />
       </View>
+
+      {!isSelf && (
+        <>
+          <View style={styles.divider} />
+
+          <Pressable
+            onPress={() => onDelete(item)}
+            style={({ pressed }) => [
+              styles.deleteButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Trash2 size={16} color={theme.colors.accentRed} />
+            <Text style={styles.deleteButtonText}>Excluir usuário</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 });
 
 export default function ListaUsuariosScreen({ navigation }) {
+  const { user } = useContext(AuthContext);
   const [usuarios, setUsuarios] = useState([]);
 
-  useEffect(() => {
-    const carregarUsuarios = async () => {
-      try {
-        const keys = await AsyncStorage.getAllKeys();
-        const usuarioKeys = keys.filter((k) => k.startsWith('usuario_'));
-        const entries = await AsyncStorage.multiGet(usuarioKeys);
-        const lista = entries
-          .map(([_, value]) => JSON.parse(value))
-          .filter(Boolean);
+  const carregarUsuarios = useCallback(async () => {
+    try {
+      await db.init();
+      const lista = await db.getTodosUsuarios();
 
-        setUsuarios(lista);
+      const mapped = (lista || []).map((u) => ({
+        id: u.id,
+        nome: u.nome || u.name || '',
+        email: u.email || '',
+        role: u.role || 'usuario',
+      }));
+
+      setUsuarios(mapped);
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', carregarUsuarios);
+    return unsubscribe;
+  }, [navigation, carregarUsuarios]);
+
+  const excluirUsuario = useCallback(async (usuario) => {
+    const confirmar = async () => {
+      try {
+        await db.deleteUsuario(usuario.email);
+        setUsuarios((prev) => prev.filter((u) => u.email !== usuario.email));
+        showSuccess('Usuário excluído com sucesso!');
       } catch (error) {
-        console.error('Erro ao carregar usuários:', error);
+        console.error('Erro ao excluir usuário:', error);
+        showError('Erro ao excluir o usuário', error.message || error.toString());
       }
     };
 
-    carregarUsuarios();
+    const mensagem = `Deseja excluir o acesso de "${usuario.email}"? Isso remove o perfil do app, mas não apaga o login (email/senha) no Firebase Authentication.`;
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(mensagem)) {
+        await confirmar();
+      }
+      return;
+    }
+
+    Alert.alert('Confirmação', mensagem, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Excluir', style: 'destructive', onPress: confirmar },
+    ]);
   }, []);
 
-  const renderItem = useCallback(({ item }) => <UserCard item={item} />, []);
+  const renderItem = useCallback(
+    ({ item }) => (
+      <UserCard
+        item={item}
+        isSelf={Boolean(user?.email) && item.email === user.email.toLowerCase()}
+        onDelete={excluirUsuario}
+      />
+    ),
+    [user?.email, excluirUsuario]
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -337,6 +399,31 @@ const styles = StyleSheet.create({
     color: theme.colors.textPrimary,
     fontWeight: '600',
     lineHeight: 20,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 16,
+  },
+  deleteButton: {
+    minHeight: 46,
+    borderRadius: 14,
+    backgroundColor: theme.colors.softRed,
+    borderWidth: 1,
+    borderColor: '#FFD7D7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  deleteButtonText: {
+    color: theme.colors.accentRed,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  pressed: {
+    opacity: 0.88,
   },
 
   emptyCard: {

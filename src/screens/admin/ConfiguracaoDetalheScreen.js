@@ -10,6 +10,7 @@ import PageContainer from '../../components/layout/PageContainer';
 import ScreenHeader from '../../components/ui/ScreenHeader';
 import { commonStyles, colors } from '../../styles/commonStyles';
 import { loadAppSettings, saveAppSetting } from '../../utils/appSettings';
+import { showSuccess, showError } from '../../utils/toast';
 
 const SECTION_META = {
   notifications: {
@@ -82,9 +83,9 @@ export default function ConfiguracaoDetalheScreen({ navigation, route }) {
           if (newPassword && user) {
             try {
               await updatePassword(user, newPassword);
-              Alert.alert('Sucesso', 'Senha alterada com sucesso!');
+              showSuccess('Senha alterada com sucesso!');
             } catch (error) {
-              Alert.alert('Erro', `Falha ao alterar senha: ${error.message}`);
+              showError('Erro ao alterar senha', error.message);
             }
           }
         },
@@ -108,10 +109,10 @@ export default function ConfiguracaoDetalheScreen({ navigation, route }) {
         onPress: async () => {
           try {
             await AsyncStorage.clear();
-            Alert.alert('Sucesso', 'Cache limpo!');
+            showSuccess('Cache limpo!');
             refreshSettings();
           } catch (error) {
-            Alert.alert('Erro', 'Falha ao limpar cache.');
+            showError('Erro', 'Falha ao limpar cache.');
           }
         },
       },

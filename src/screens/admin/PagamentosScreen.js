@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -17,6 +16,7 @@ import ScreenHeader from '../../components/ui/ScreenHeader';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import { commonStyles, colors } from '../../styles/commonStyles';
 import { AuthContext } from '../../context/AuthContext';
+import { showSuccess, showError } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 const formatStatusLabel = (status) => {
@@ -262,7 +262,7 @@ export default function PagamentosScreen({ navigation }) {
       setContratos(listaComStatus);
     } catch (e) {
       console.error(e);
-      Alert.alert('Erro', 'Não foi possível carregar os pagamentos.');
+      showError('Erro', 'Não foi possível carregar os pagamentos.');
     } finally {
       setLoading(false);
     }
@@ -297,17 +297,17 @@ export default function PagamentosScreen({ navigation }) {
         if (novoStatus === 'finalizado') {
           const ok = await salvarHistorico(contratoBase);
           if (!ok) {
-            Alert.alert('Erro', 'Não foi possível salvar o histórico. Tente novamente.');
+            showError('Erro', 'Não foi possível salvar o histórico. Tente novamente.');
             return;
           }
 
           try {
             await db.deleteContrato(id);
             setContratos((prev) => prev.filter((c) => c.id !== id));
-            Alert.alert('Sucesso', 'Contrato movido para o histórico.');
+            showSuccess('Sucesso', 'Contrato movido para o histórico.');
           } catch (error) {
             console.error(error);
-            Alert.alert('Erro', 'Histórico salvo, mas não foi possível remover o contrato.');
+            showError('Erro', 'Histórico salvo, mas não foi possível remover o contrato.');
           }
           return;
         }
@@ -325,7 +325,7 @@ export default function PagamentosScreen({ navigation }) {
         );
       } catch (error) {
         console.error(error);
-        Alert.alert('Erro', 'Não foi possível atualizar o status.');
+        showError('Erro', 'Não foi possível atualizar o status.');
       }
     },
     [contratos, salvarHistorico]

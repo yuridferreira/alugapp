@@ -6,8 +6,6 @@ import {
   Pressable,
   Dimensions,
   SafeAreaView,
-  Alert,
-  Platform,
 } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firebaseConfig.js';
@@ -18,6 +16,7 @@ import HeroBanner from '../../components/ui/HeroBanner';
 import SummaryCard from '../../components/ui/SummaryCard';
 import ActionCard from '../../components/ui/ActionCard';
 import StatusBadge from '../../components/ui/StatusBadge';
+import { showError } from '../../utils/toast';
 import {
   UserPlus,
   Users,
@@ -44,18 +43,6 @@ export default function HomeScreen({ navigation }) {
   const compact = screenWidth < 400;
   const numColumns = compact ? 2 : 3;
 
-  const showAlert = (title, message, buttons, options) => {
-    if (Platform.OS === 'web') {
-      if (!message) {
-        window.alert(title);
-        return;
-      }
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-    Alert.alert(title, message, buttons, options);
-  };
-
   const handleLogout = useCallback(async () => {
     try {
       await signOut(auth);
@@ -64,7 +51,7 @@ export default function HomeScreen({ navigation }) {
         routes: [{ name: 'Login' }],
       });
     } catch (error) {
-      showAlert('Erro', 'Não foi possível sair da conta.');
+      showError('Erro', 'Não foi possível sair da conta.');
     }
   }, [navigation]);
 
