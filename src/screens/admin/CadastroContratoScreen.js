@@ -4,9 +4,9 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Text,
-  Alert,
   Platform,
   View,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -18,6 +18,8 @@ import {
   BadgeDollarSign,
   Mail,
   Building2,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react-native';
 import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
@@ -25,7 +27,21 @@ import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
 import * as Notifications from 'expo-notifications';
 import { loadAppSettings } from '../../utils/appSettings';
+import { showSuccess, showError, showLoading, hideToast } from '../../utils/toast';
 import { theme } from '../../styles/theme';
+
+// Constrói a data ao meio-dia local (evita o deslocamento de um dia que
+// `new Date('AAAA-MM-DD')` causa em fusos negativos, por interpretar a string como UTC).
+// Retorna null se a string não representa uma data DD/MM/AAAA completa e válida.
+const parseDataBr = (dataBr) => {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(String(dataBr || ''))) return null;
+  const [dia, mes, ano] = dataBr.split('/').map(Number);
+  const data = new Date(ano, mes - 1, dia, 12, 0, 0, 0);
+  if (data.getFullYear() !== ano || data.getMonth() !== mes - 1 || data.getDate() !== dia) {
+    return null;
+  }
+  return data;
+};
 
 if (Platform.OS !== 'web') {
   Notifications.setNotificationHandler({
@@ -62,6 +78,7 @@ export default function CadastroContratoScreen({ navigation }) {
   const [emailInquilino, setEmailInquilino] = useState('');
   const [settings, setSettings] = useState({ notificationsEnabled: true });
   const [loading, setLoading] = useState(false);
+  const [usuarioStatus, setUsuarioStatus] = useState('idle'); // idle | checking | found | not_found
 
   useEffect(() => {
     async function carregarDados() {
@@ -94,6 +111,37 @@ export default function CadastroContratoScreen({ navigation }) {
 
     carregarDados();
   }, []);
+
+  useEffect(() => {
+    const normalizedEmail = emailInquilino.trim().toLowerCase();
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      setUsuarioStatus('idle');
+      return;
+    }
+
+    let cancelado = false;
+    setUsuarioStatus('checking');
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const usuario = await db.getUsuarioByEmail(normalizedEmail);
+        if (!cancelado) setUsuarioStatus(usuario ? 'found' : 'not_found');
+      } catch (e) {
+        if (!cancelado) setUsuarioStatus('idle');
+      }
+    }, 400);
+
+    return () => {
+      cancelado = true;
+      clearTimeout(timeoutId);
+    };
+  }, [emailInquilino]);
+
+  const handleCriarUsuarioAgora = () => {
+    navigation.navigate('CadastroUsuario', {
+      prefillEmail: emailInquilino.trim().toLowerCase(),
+    });
+  };
 
   useEffect(() => {
     if (!selectedInquilino) return;
@@ -136,8 +184,8 @@ export default function CadastroContratoScreen({ navigation }) {
     if (Platform.OS === 'web') return;
     if (!contrato.fim) return;
 
-    const [dia, mes, ano] = contrato.fim.split('/');
-    const vencimento = new Date(`${ano}-${mes}-${dia}`);
+    const vencimento = parseDataBr(contrato.fim);
+    if (!vencimento) return;
     const notificationDate = new Date(vencimento);
     notificationDate.setDate(notificationDate.getDate() - 3);
 
@@ -165,18 +213,6 @@ export default function CadastroContratoScreen({ navigation }) {
     });
   };
 
-  const showAlert = (title, message, buttons, options) => {
-    if (Platform.OS === 'web') {
-      if (!message) {
-        window.alert(title);
-        return;
-      }
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-    Alert.alert(title, message, buttons, options);
-  };
-
   const handleSalvar = async () => {
     if (
       !selectedInquilino ||
@@ -186,7 +222,7 @@ export default function CadastroContratoScreen({ navigation }) {
       !valor ||
       !emailInquilino.trim()
     ) {
-      showAlert('Preencha todos os campos, incluindo o email do inquilino.');
+      showError('Preencha todos os campos, incluindo o email do inquilino.');
       return;
     }
 
@@ -199,13 +235,34 @@ export default function CadastroContratoScreen({ navigation }) {
     const normalizedEmail = emailInquilino.trim().toLowerCase();
 
     if (inquilinoSelecionado?.email && inquilinoSelecionado.email !== normalizedEmail) {
-      showAlert('O email informado deve ser o mesmo email cadastrado para o inquilino selecionado.');
+      showError('O email informado deve ser o mesmo email cadastrado para o inquilino selecionado.');
+      return;
+    }
+
+    if (usuarioStatus === 'not_found') {
+      showError(
+        'Nenhum usuário de login encontrado para este email.',
+        'Crie o acesso em "Cadastro de Usuário" antes de salvar o contrato.'
+      );
       return;
     }
 
     const valorNumerico = Number(String(valor).replace(',', '.'));
     if (Number.isNaN(valorNumerico) || valorNumerico <= 0) {
-      showAlert('Informe um valor de aluguel válido.');
+      showError('Informe um valor de aluguel válido.');
+      return;
+    }
+
+    const inicioData = parseDataBr(inicio);
+    const fimData = parseDataBr(fim);
+
+    if (!inicioData || !fimData) {
+      showError('Informe datas de início e fim completas e válidas (DD/MM/AAAA).');
+      return;
+    }
+
+    if (fimData < inicioData) {
+      showError('A data de fim não pode ser anterior à data de início.');
       return;
     }
 
@@ -229,6 +286,7 @@ export default function CadastroContratoScreen({ navigation }) {
 
     try {
       setLoading(true);
+      showLoading('Salvando contrato...');
 
       const resultado = await db.criarContratoComPagamentosAutomaticos(
         contrato,
@@ -251,14 +309,16 @@ export default function CadastroContratoScreen({ navigation }) {
         );
       }
 
-      showAlert(
+      hideToast();
+      showSuccess(
         'Contrato cadastrado com sucesso!',
         `Contrato vinculado ao usuário ${resultado.contrato.email} e ${resultado.pagamentos.length} pagamento(s) foram gerados automaticamente.`
       );
 
       navigation.navigate('ListaContratos');
     } catch (err) {
-      showAlert('Erro ao salvar contrato.', err.message);
+      hideToast();
+      showError('Erro ao salvar contrato.', err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -427,6 +487,33 @@ export default function CadastroContratoScreen({ navigation }) {
                   autoCapitalize="none"
                 />
               </Field>
+
+              {usuarioStatus === 'checking' && (
+                <Text style={styles.usuarioStatusChecking}>Verificando usuário...</Text>
+              )}
+
+              {usuarioStatus === 'not_found' && (
+                <View style={[styles.usuarioStatusBanner, styles.usuarioStatusWarning]}>
+                  <AlertTriangle size={16} color={theme.colors.accentRed} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.usuarioStatusWarningText}>
+                      Nenhum usuário de login encontrado para este email. É preciso criar o acesso antes de salvar o contrato.
+                    </Text>
+                    <Pressable onPress={handleCriarUsuarioAgora}>
+                      <Text style={styles.usuarioStatusLinkText}>Criar usuário agora →</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+
+              {usuarioStatus === 'found' && (
+                <View style={[styles.usuarioStatusBanner, styles.usuarioStatusSuccess]}>
+                  <CheckCircle2 size={16} color={theme.colors.accentGreen} />
+                  <Text style={styles.usuarioStatusSuccessText}>
+                    Usuário encontrado — o contrato será vinculado automaticamente.
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -586,6 +673,49 @@ const styles = StyleSheet.create({
   picker: {
     color: theme.colors.textPrimary,
     width: '100%',
+  },
+
+  usuarioStatusChecking: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginTop: -6,
+  },
+  usuarioStatusBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: -6,
+  },
+  usuarioStatusWarning: {
+    backgroundColor: theme.colors.softRed,
+    borderWidth: 1,
+    borderColor: '#FFD7D7',
+  },
+  usuarioStatusWarningText: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: theme.colors.accentRed,
+    fontWeight: '600',
+  },
+  usuarioStatusLinkText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.accentRed,
+    marginTop: 6,
+  },
+  usuarioStatusSuccess: {
+    backgroundColor: theme.colors.softGreen,
+    borderWidth: 1,
+    borderColor: theme.colors.accentGreen + '40',
+  },
+  usuarioStatusSuccessText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    color: theme.colors.accentGreen,
+    fontWeight: '600',
   },
 
   primaryButton: {

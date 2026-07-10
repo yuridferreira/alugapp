@@ -6,7 +6,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   Platform,
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -16,6 +15,7 @@ import { AuthContext } from '../../context/AuthContext';
 import PageContainer from '../../components/layout/PageContainer';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
+import { showError } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 function Field({ icon: Icon, iconColor, bgColor, label, children }) {
@@ -38,21 +38,9 @@ export default function LoginScreen({ navigation }) {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const showAlert = (title, message, buttons, options) => {
-    if (Platform.OS === 'web') {
-      if (!message) {
-        window.alert(title);
-        return;
-      }
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-    Alert.alert(title, message, buttons, options);
-  };
-
   const handleLogin = async () => {
     if (!email || !senha) {
-      showAlert('Erro', 'Preencha o email e a senha.');
+      showError('Erro', 'Preencha o email e a senha.');
       return;
     }
 
@@ -60,7 +48,7 @@ export default function LoginScreen({ navigation }) {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), senha);
     } catch (error) {
-      showAlert('Erro no login', error.message);
+      showError('Erro no login', error.message);
     } finally {
       setLoading(false);
     }
@@ -68,7 +56,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleGoToCadastro = () => {
     if (user) {
-      showAlert('Aviso', 'Você já está autenticado.');
+      showError('Aviso', 'Você já está autenticado.');
       return;
     }
 

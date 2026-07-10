@@ -3,7 +3,6 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   TextInput,
-  Alert,
   Platform,
   View,
   Text,
@@ -16,6 +15,7 @@ import { auth, db } from '../../../firebaseConfig.js';
 import PageContainer from '../../components/layout/PageContainer';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
+import { showSuccess, showError, showLoading, hideToast } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 function Field({ icon: Icon, iconColor, bgColor, label, children }) {
@@ -32,43 +32,32 @@ function Field({ icon: Icon, iconColor, bgColor, label, children }) {
   );
 }
 
-export default function CadastroUsuarioScreen({ navigation }) {
+export default function CadastroUsuarioScreen({ navigation, route }) {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(route?.params?.prefillEmail || '');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const showAlert = (title, message, buttons, options) => {
-    if (Platform.OS === 'web') {
-      if (!message) {
-        window.alert(title);
-        return;
-      }
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-    Alert.alert(title, message, buttons, options);
-  };
-
   const handleCadastro = async () => {
     if (!name.trim() || !email.trim() || !senha) {
-      showAlert('Erro', 'Preencha todos os campos!');
+      showError('Erro', 'Preencha todos os campos!');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      showAlert('Erro', 'Informe um email válido.');
+      showError('Erro', 'Informe um email válido.');
       return;
     }
 
     if (senha.length < 6) {
-      showAlert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+      showError('Erro', 'A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
     try {
       setLoading(true);
+      showLoading('Cadastrando usuário...');
 
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -85,13 +74,15 @@ export default function CadastroUsuarioScreen({ navigation }) {
         criadoEm: new Date(),
       });
 
-      showAlert('Sucesso', 'Usuário cadastrado com sucesso');
+      hideToast();
+      showSuccess('Sucesso', 'Usuário cadastrado com sucesso');
       setName('');
       setEmail('');
       setSenha('');
       navigation.goBack();
     } catch (error) {
-      showAlert('Erro', error.message);
+      hideToast();
+      showError('Erro', error.message);
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ import {
 import db from '../../services/localdb/db';
 import PageContainer from '../../components/layout/PageContainer';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
+import { showSuccess, showError } from '../../utils/toast';
 import { theme } from '../../styles/theme';
 
 const ContractInfoRow = ({ icon: Icon, iconColor, bgColor, label, value }) => (
@@ -192,8 +193,10 @@ export default function ListaContratosScreen({ navigation }) {
       try {
         await db.deleteContrato(id);
         setContratos((prev) => prev.filter((c) => c.id !== id));
+        showSuccess('Contrato excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir contrato:', error);
+        showError('Erro ao excluir o contrato', error.message || error.toString());
       }
     };
 

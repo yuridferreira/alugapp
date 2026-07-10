@@ -592,9 +592,10 @@ export const db = {
     if (!contratoData) throw new Error('Dados do contrato são obrigatórios');
     if (!emailInquilino) throw new Error('Email do inquilino é obrigatório');
 
+    let resultadoContrato = null;
     try {
       // 1. Vincular contrato ao usuário
-      const resultadoContrato = await this.saveContratoComVinculoUsuario(contratoData, emailInquilino);
+      resultadoContrato = await this.saveContratoComVinculoUsuario(contratoData, emailInquilino);
 
       // 2. Criar pagamentos vinculados ao contrato
       const pagamentosParaCriar = Array.isArray(pagamentosData) && pagamentosData.length > 0
@@ -626,6 +627,15 @@ export const db = {
       };
     } catch (error) {
       console.error('Erro ao criar contrato com pagamentos:', error);
+      if (resultadoContrato?.id) {
+        try {
+          // Reverte o contrato (e quaisquer pagamentos já criados) para não deixar
+          // estado parcial no Firestore quando a geração de pagamentos falha no meio.
+          await this.deleteContrato(resultadoContrato.id);
+        } catch (cleanupError) {
+          console.error('Erro ao reverter contrato após falha parcial:', cleanupError);
+        }
+      }
       throw new Error(`Erro ao criar contrato: ${error.message}`);
     }
   },
