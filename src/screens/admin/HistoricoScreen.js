@@ -49,13 +49,42 @@ export default function HistoricoScreen({ navigation }) {
       try {
         await db.init();
         let entries = [];
+
+        let tenantsByCpf = {};
+        let tenantsById = {};
+        try {
+          const allTenants = await db.getTodosInquilinos();
+          (allTenants || []).forEach((t) => {
+            if (t?.cpf) tenantsByCpf[String(t.cpf)] = t;
+            if (t?.id) tenantsById[String(t.id)] = t;
+          });
+        } catch (e) {
+          console.warn('Erro ao carregar inquilinos para o histórico:', e);
+        }
+
+        const resolverNomeInquilino = (parsed) => {
+          const referencia = parsed.inquilino || parsed.tenant_id || parsed.tenant;
+          const tenant = referencia
+            ? tenantsByCpf[String(referencia)] || tenantsById[String(referencia)]
+            : null;
+          return (
+            parsed.tenantName ||
+            parsed.nome ||
+            parsed.name ||
+            tenant?.nome ||
+            tenant?.name ||
+            referencia ||
+            '—'
+          );
+        };
+
         try {
           const h = await db.getHistory();
           entries = (h || []).map(row => {
             const parsed = typeof row.data === 'string' ? JSON.parse(row.data) : (row.data || {});
             return {
               id: row.id || `${row.entity}_${row.entity_id}_${row.date}`,
-              inquilino: parsed.inquilino || parsed.tenantName || parsed.tenant || parsed.nome || parsed.name || '—',
+              inquilino: resolverNomeInquilino(parsed),
               imovel: parsed.imovel || parsed.propertyAddress || parsed.property || parsed.endereco || parsed.address || '—',
               valor: parsed.valor || parsed.rent_value || parsed.amount || '—',
               status: parsed.status || row.action || '—',
@@ -75,7 +104,7 @@ export default function HistoricoScreen({ navigation }) {
             const listaLegada = dados ? JSON.parse(dados) : [];
             const formatoLegado = (listaLegada || []).map(item => ({
               id: item.id || `legacy_${item.inquilino || ''}_${item.imovel || ''}_${item.dataTermino || item.dataInicio || ''}`,
-              inquilino: item.inquilino || '—',
+              inquilino: resolverNomeInquilino(item),
               imovel: item.imovel || '—',
               valor: item.valor || '—',
               status: item.status || '—',

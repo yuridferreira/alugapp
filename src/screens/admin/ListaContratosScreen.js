@@ -16,6 +16,7 @@ import {
   User,
   BadgeDollarSign,
   Trash2,
+  Archive,
   FolderOpen,
   BadgeCheck,
 } from 'lucide-react-native';
@@ -60,7 +61,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const ContractCard = memo(function ContractCard({ item, onDelete, formatarData }) {
+const ContractCard = memo(function ContractCard({ item, onEncerrar, onDelete, formatarData }) {
   return (
     <View style={styles.card}>
       <View style={styles.cardTopAccent} />
@@ -114,16 +115,29 @@ const ContractCard = memo(function ContractCard({ item, onDelete, formatarData }
 
       <View style={styles.divider} />
 
-      <Pressable
-        onPress={() => onDelete(item.id)}
-        style={({ pressed }) => [
-          styles.deleteButton,
-          pressed && styles.pressed,
-        ]}
-      >
-        <Trash2 size={16} color={theme.colors.accentRed} />
-        <Text style={styles.deleteButtonText}>Excluir contrato</Text>
-      </Pressable>
+      <View style={styles.actionsRow}>
+        <Pressable
+          onPress={() => onEncerrar(item)}
+          style={({ pressed }) => [
+            styles.encerrarButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Archive size={16} color={theme.colors.accentYellow} />
+          <Text style={styles.encerrarButtonText}>Encerrar</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => onDelete(item.id)}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Trash2 size={16} color={theme.colors.accentRed} />
+          <Text style={styles.deleteButtonText}>Excluir</Text>
+        </Pressable>
+      </View>
     </View>
   );
 });
@@ -186,6 +200,36 @@ export default function ListaContratosScreen({ navigation }) {
     }
   }, []);
 
+  const encerrarContrato = useCallback(async (item) => {
+    const confirmMessage = `Deseja encerrar o contrato #${item.id}? Ele será movido para o histórico e removido da lista de contratos ativos.`;
+
+    const execute = async () => {
+      try {
+        await db.addHistory('contract', item.id, 'moved_to_history', {
+          ...item,
+          status: 'finalizado',
+        });
+        await db.deleteContrato(item.id);
+        setContratos((prev) => prev.filter((c) => c.id !== item.id));
+        showSuccess('Contrato encerrado com sucesso!', 'O contrato foi movido para o histórico.');
+      } catch (error) {
+        console.error('Erro ao encerrar contrato:', error);
+        showError('Erro ao encerrar o contrato', error.message || error.toString());
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(confirmMessage)) {
+        await execute();
+      }
+    } else {
+      Alert.alert('Confirmação', confirmMessage, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Encerrar', onPress: execute },
+      ]);
+    }
+  }, []);
+
   const excluirContrato = useCallback(async (id) => {
     const confirmMessage = `Deseja excluir o contrato #${id}?`;
 
@@ -230,11 +274,12 @@ export default function ListaContratosScreen({ navigation }) {
     ({ item }) => (
       <ContractCard
         item={item}
+        onEncerrar={encerrarContrato}
         onDelete={excluirContrato}
         formatarData={formatarData}
       />
     ),
-    [excluirContrato]
+    [encerrarContrato, excluirContrato]
   );
 
   return (
@@ -491,7 +536,29 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
 
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  encerrarButton: {
+    flex: 1,
+    minHeight: 46,
+    borderRadius: 14,
+    backgroundColor: theme.colors.softYellow,
+    borderWidth: 1,
+    borderColor: '#FCE7B8',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  encerrarButtonText: {
+    color: theme.colors.accentYellow,
+    fontSize: 13,
+    fontWeight: '800',
+  },
   deleteButton: {
+    flex: 1,
     minHeight: 46,
     borderRadius: 14,
     backgroundColor: theme.colors.softRed,
