@@ -148,7 +148,6 @@ export default function HomeScreen({ navigation }) {
                   iconColor={item.iconColor}
                   bgColor={item.bgColor}
                   title={item.label}
-                  subtitle="Abrir seção"
                   compact={compact}
                   onPress={() => navigation.navigate(item.name)}
                 />
