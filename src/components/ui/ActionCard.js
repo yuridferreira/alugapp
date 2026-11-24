@@ -17,7 +17,7 @@ export default function ActionCard({ icon: Icon, iconColor, bgColor, title, subt
         <Icon size={20} color={iconColor} />
       </View>
       <Text style={styles.quickCardTitle}>{title}</Text>
-      <Text style={styles.quickCardSub}>{subtitle}</Text>
+      {subtitle ? <Text style={styles.quickCardSub}>{subtitle}</Text> : null}
     </Pressable>
   );
 }
